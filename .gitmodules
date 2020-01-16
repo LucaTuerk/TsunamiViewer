@@ -1,0 +1,3 @@
+[submodule "src/utils/TGA"]
+	path = src/utils/TGA
+	url = https://github.com/ColumbusUtrigas/TGA.git
