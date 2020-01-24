@@ -9,7 +9,10 @@
 #endif
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <iostream>
 #include "../data/structs.h"
+
+#define SPACEBAR 32
 
 static struct {
     int mouseX, mouseY;
@@ -17,10 +20,50 @@ static struct {
     int mouseWheel;
 
     float sensitivity = 10.f;
-    float scrollSensitivity = 1.f;
+    float scrollSensitivity = 0.5f;
 
     bool mouseClicked;
 } input;
+
+static void keyboardFunc ( unsigned char key, int x, int y ) {
+    switch ( key ) {
+        case SPACEBAR :
+            transportControl.state = transportState :: PAUSED;
+            break;
+        case '1' :
+            transportControl.multiplier = 1;
+            break;
+        case '2' :
+            transportControl.multiplier = 5;
+            break;
+        case '3' :
+            transportControl.multiplier = 10;
+            break;
+        case '4' :
+            transportControl.multiplier = 20;
+            break;
+        case '5' :
+            transportControl.multiplier = 50;
+            break;
+        case '6' :
+            transportControl.multiplier = 100;
+            break;
+    }
+}
+
+static void specialFunc ( int key, int x, int y ) {
+    switch ( key ) {
+        case GLUT_KEY_LEFT :
+            transportControl.state = transportState :: REVERSED;
+            break;
+        case GLUT_KEY_DOWN :
+            transportControl.state = transportState :: STOPPED;
+            break;
+        case GLUT_KEY_RIGHT :
+            transportControl.state = transportState :: PLAYING;
+            break;
+    }
+}
 
 static void mouseButtonFunc ( int button, int state, int x, int y ) {
     if( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN ) {
@@ -57,10 +100,16 @@ static void mouseActive ( int x, int y ) {
 }
 
 static void updateCamera () {
-    camera.lambda += input.sensitivity * (float) input.deltaMouseX / glutGet(GLUT_WINDOW_WIDTH);
-    camera.theta += input.sensitivity * (float) input.deltaMouseY  / glutGet(GLUT_WINDOW_HEIGHT);
-    camera.distance = std::min ( 50.f, std::max ( -3.f, camera.distance + input.scrollSensitivity * input.mouseWheel));
-    input.mouseWheel = 0;
+    float distScaling = std::log ( camera.distance + 4.01f );
+    camera.lambda += distScaling * input.sensitivity * (float) input.deltaMouseX / glutGet(GLUT_WINDOW_WIDTH);
+    camera.theta += distScaling * input.sensitivity * (float) input.deltaMouseY  / glutGet(GLUT_WINDOW_HEIGHT);
+    camera.distance = std::min ( 
+            50.f, 
+            std::max ( 
+                -3.f, 
+                camera.distance + 
+                distScaling * input.scrollSensitivity * input.mouseWheel));
+                input.mouseWheel = 0;
 }
 
 #endif

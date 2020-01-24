@@ -12,25 +12,91 @@
 #include <cmath>
 #include <vector>
 #include "../data/resources.h"
+#include "../data/ui.h"
 
 static float lerp (float a, float b, float t) {
     return (1-t) * a + t * b;
 }
 
-static int makeBackground ( const char * tex1, const char * tex2, const char * vert, const char * frag ) {
-    std::cout << "Making Background Resources" << std::endl;
-    // Make Buffers
-    resources.vertex_buffer = makeBuffer ( 
-        GL_ARRAY_BUFFER, 
-        vertex_buffer_data, 
-        sizeof(vertex_buffer_data)
+// Following http://www.songho.ca/opengl/gl_sphere.html
+template < typename I >
+static int makeUVSphere ( int nLat, int nLon, GLuint & vertexBuffer, GLuint & indexBuffer, GLuint & count) {
+    std::cout << "Making UV " << (nLat + 1) * (nLon + 1) + 2 << std::endl;
+    std::vector<vertex> data;
+    std::vector<I> indices;
+
+    data.push_back( { glm::vec4 (0,1,0,1), glm::vec2(0,0) } );
+
+    float lonStep = 1.f / (nLon);
+    float latStep = 1.f / (nLat + 1.f);
+
+    for ( int lat = 0; lat < nLat + 1; lat++) {
+        for (int lon = 0; lon < nLon + 1; lon++) {
+
+            glm::vec2 uv = 
+                glm::vec2(lon * lonStep, 1.f - (lat + 1.f) * latStep);
+
+            float theta = uv.x * 2.f * M_PI;
+            float lambda = (uv.y - 0.5f) * M_PI;
+
+            float c = cos(lambda);
+
+            glm::vec4 pos =
+                glm::vec4( c * cos(theta), sin(lambda), c * sin(theta), 1);
+
+
+            uv.y = lerp (1,0,uv.y);
+            data.push_back( {pos, uv} );
+        }
+    }
+
+    data.push_back( { glm::vec4 (0,-1,0,1), glm::vec2(0,1) } );
+
+    I k1, k2;
+    for (int i = 0; i < nLat + 1; i++) {
+        k1 = i * ( nLon + 1 );
+        k2 = k1 + nLon + 1; 
+        for (int j = 0; j < nLon + 1; j++, k1++, k2++) {
+            if ( i != 0 ) {
+                indices.push_back(k1);
+                indices.push_back(k2);
+                indices.push_back( (k1 + 1 ) );
+            }
+            if ( i != ( nLat ) ) {
+                indices.push_back(k1 + 1);
+                indices.push_back(k2);
+                indices.push_back( ( k2 + 1 ) );
+            }
+        }
+    }
+
+    std::cout << data.size() << " " << indices.size() << std::endl;
+
+    vertexBuffer = makeBuffer (
+        GL_ARRAY_BUFFER,
+        (void *) &data[0],
+        data.size() * sizeof(vertex)
     );
 
-    resources.element_buffer = makeBuffer (
+    indexBuffer = makeBuffer (
         GL_ELEMENT_ARRAY_BUFFER,
-        element_buffer_data,
-        sizeof(element_buffer_data)
+        (void *) &indices[0],
+        indices.size() * sizeof(I)
     );
+
+    count = indices.size();
+
+    return 1;
+}
+
+static int makeBackground ( const char * tex1, const char * tex2, const char * vert, const char * frag ) {
+    std::cout << "Making Background Resources" << std::endl;
+
+    if ( !makeUVSphere <GLushort> (200, 200,
+            resources.vertex_buffer,
+            resources.element_buffer,
+            resources.count) ) 
+        return 0;
 
     // Make Textures
     resources.textures[0] = makeTexture ( tex1 );
@@ -76,100 +142,33 @@ static int makeBackground ( const char * tex1, const char * tex2, const char * v
     resources.uniforms.textures[1] =
         glGetUniformLocation ( resources.program, "textures[1]" );
 
+    resources.uniforms.blurStrength = 
+        glGetUniformLocation ( resources.program, "blurStrength");
+
     resources.attributes.position =
         glGetAttribLocation ( resources.program, "position" );
 
     resources.attributes.uv =
         glGetAttribLocation ( resources.program, "uv" );
+        
 
     return 1;
 }
 
-// Following http://www.songho.ca/opengl/gl_sphere.html
-static int makeUVSphere ( int nLat, int nLon ) {
-    std::cout << "Making Earth" << std::endl;
-    std::vector<vertex> data;
-    std::vector<GLushort> indices;
-
-    data.push_back( { glm::vec4 (0,1,0,1), glm::vec2(0,0) } );
-
-    float lonStep = 1.f / (nLon);
-    float latStep = 1.f / (nLat + 1.f);
-
-    for ( int lat = 0; lat < nLat + 1; lat++) {
-        for (int lon = 0; lon < nLon + 1; lon++) {
-
-            glm::vec2 uv = 
-                glm::vec2(lon * lonStep, 1.f - (lat + 1.f) * latStep);
-
-            float theta = uv.x * 2.f * M_PI;
-            float lambda = (uv.y - 0.5f) * M_PI;
-
-            float c = cos(lambda);
-
-            glm::vec4 pos =
-                glm::vec4( c * cos(theta), sin(lambda), c * sin(theta), 1);
-
-
-            uv.y = lerp (1,0,uv.y);
-            data.push_back( {pos, uv} );
-        }
-    }
-
-     data.push_back( { glm::vec4 (0,-1,0,1), glm::vec2(0,1) } );
-
-    GLushort k1, k2;
-    for (int i = 0; i < nLat + 1; i++) {
-        k1 = i * ( nLon + 1 );
-        k2 = k1 + nLon + 1; 
-        for (int j = 0; j < nLon + 1; j++, k1++, k2++) {
-            if ( i != 0 ) {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back( (k1 + 1 ) );
-            }
-            if ( i != ( nLat ) ) {
-                indices.push_back(k1 + 1);
-                indices.push_back(k2);
-                indices.push_back( ( k2 + 1 ) );
-            }
-        }
-    }
-
-    std::cout << data.size() << " " << indices.size() << std::endl;
-
-    earth_resources.vertex_buffer = makeBuffer (
-        GL_ARRAY_BUFFER,
-        (void *) &data[0],
-        data.size() * sizeof(vertex)
-    );
-
-    earth_resources.element_buffer = makeBuffer (
-        GL_ELEMENT_ARRAY_BUFFER,
-        (void *) &indices[0],
-        indices.size() * sizeof(GLushort)
-    );
-
-    earth_resources.element_count = indices.size();
-
-    return 1;
-}
-
-static int makeCube () {
-    return 1;
-}
-
-static int makeEarth ( int nLat, int nLon, const char * tex1, const char * tex2, const char * tex3, const char * tex4, const char * vert, const char * frag ) {
+static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag ) {
     std::cout << "Making Earth Resources" << std::endl; 
     // Make Geometry
-    if ( !makeUVSphere (nLat, nLon) ) 
+    if ( !makeUVSphere <GLuint> (nLat, nLon, 
+                    earth_resources.vertex_buffer, 
+                    earth_resources.element_buffer, 
+                    earth_resources.element_count) ) 
         return 0;
 
     // Make Textures
-    earth_resources.textures[0] = makeTexture (tex1);
-    earth_resources.textures[1] = makeTexture (tex2);
-    earth_resources.textures[2] = makeTexture (tex3);
-    earth_resources.textures[3] = makeTexture (tex4);
+    earth_resources.textures[0] = makeTextureFromData ( bufferType :: B );
+    earth_resources.textures[1] = makeTextureFromData ( bufferType :: H );
+    earth_resources.textures[2] = makeTextureFromData ( bufferType :: HU );
+    earth_resources.textures[3] = makeTextureFromData ( bufferType :: HV );
 
     if ( earth_resources.textures[0] == 0 || earth_resources.textures[1] == 0 || 
         earth_resources.textures[2] == 0 || earth_resources.textures[3] == 0 ) {
@@ -207,6 +206,15 @@ static int makeEarth ( int nLat, int nLon, const char * tex1, const char * tex2,
     earth_resources.uniforms.MVP =
         glGetUniformLocation ( earth_resources.program, "MVP" );
 
+    earth_resources.uniforms.M =
+        glGetUniformLocation ( earth_resources.program, "M" );
+    
+    earth_resources.uniforms.V =
+        glGetUniformLocation ( earth_resources.program, "V" );
+    
+    earth_resources.uniforms.P =
+        glGetUniformLocation ( earth_resources.program, "P" );
+
     earth_resources.uniforms.time =
         glGetUniformLocation ( earth_resources.program, "time" );
 
@@ -238,6 +246,125 @@ static int makeEarth ( int nLat, int nLon, const char * tex1, const char * tex2,
         glGetAttribLocation ( earth_resources.program, "uv" );
 
     return 1;
+}
+
+static int makeProgressbar ( const char * vert, const char * frag ) {
+    // Make Shaders
+    progressbar.vertex_shader =
+        makeShader (
+            GL_VERTEX_SHADER,
+            vert
+        );
+    if (progressbar.vertex_shader == 0) 
+        return 0;
+
+    progressbar.fragment_shader =
+        makeShader (
+            GL_FRAGMENT_SHADER,
+            frag
+        );
+    if (progressbar.fragment_shader == 0)
+        return 0;
+
+    progressbar.program =
+        makeProgram (
+            {
+                progressbar.vertex_shader, 
+                progressbar.fragment_shader
+            }
+        );
+
+    if (progressbar.program == 0)
+        return 0;
+
+    // Make Buffers
+    progressbar.vertex_buffer = makeBuffer (
+        GL_ARRAY_BUFFER,
+        vertex_buffer_data,
+        ( 8 * sizeof(GLfloat))
+    );
+
+    progressbar.index_buffer = makeBuffer (
+        GL_ELEMENT_ARRAY_BUFFER,
+        element_buffer_data,
+        ( 4 * sizeof(GLushort))
+    );
+
+    // Make Uniforms
+    progressbar.uniforms.factor = 
+        glGetUniformLocation ( progressbar.program, "factor" );
+
+    // Make Attributes
+    progressbar.attributes.position =
+        glGetAttribLocation ( progressbar.program, "position");
+
+    return 1;
+}
+
+static int makeUI ( const char * vert, const char * frag ) {
+    // Make Shaders
+    ui.vertex_shader =
+        makeShader (
+            GL_VERTEX_SHADER,
+            vert
+        );
+    if (ui.vertex_shader == 0) 
+        return 0;
+
+    ui.fragment_shader =
+        makeShader (
+            GL_FRAGMENT_SHADER,
+            frag
+        );
+    if (ui.fragment_shader == 0)
+        return 0;
+
+    ui.program =
+        makeProgram (
+            {
+                ui.vertex_shader, 
+                ui.fragment_shader
+            }
+        );
+
+    if (ui.program == 0)
+        return 0;
+
+    // Make Buffers
+    ui.uv_buffer = makeBuffer (
+        GL_ARRAY_BUFFER,
+        uv_buffer_data,
+        ( 8 * sizeof(GLfloat))
+    );
+
+    ui.index_buffer = makeBuffer (
+        GL_ELEMENT_ARRAY_BUFFER,
+        element_buffer_data,
+        ( 4 * sizeof(GLushort))
+    );
+
+    // Make Uniforms
+    ui.uniforms.position = 
+        glGetUniformLocation ( ui.program, "position" );
+    ui.uniforms.size = 
+        glGetUniformLocation ( ui.program, "size" );
+
+    // Make Attributes
+    ui.attributes.uv =
+        glGetAttribLocation ( ui.program, "uv");
+
+    return 1;
+}
+
+static int makeUIElement ( glm::vec2 pos, glm::vec2 size, const char * texture ) {
+    GLuint tex = makeTexture(texture);
+    if ( tex == 0 )
+        return 0;
+
+    ui.elements.
+        push_back ( {pos, size, tex});
+    
+    return ui.elements.size() - 1;
 }
 
 #endif

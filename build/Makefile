@@ -123,6 +123,33 @@ viewer/fast:
 	$(MAKE) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/build
 .PHONY : viewer/fast
 
+src/data/netcdf/netcdfReader.o: src/data/netcdf/netcdfReader.cpp.o
+
+.PHONY : src/data/netcdf/netcdfReader.o
+
+# target to build an object file
+src/data/netcdf/netcdfReader.cpp.o:
+	$(MAKE) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.o
+.PHONY : src/data/netcdf/netcdfReader.cpp.o
+
+src/data/netcdf/netcdfReader.i: src/data/netcdf/netcdfReader.cpp.i
+
+.PHONY : src/data/netcdf/netcdfReader.i
+
+# target to preprocess a source file
+src/data/netcdf/netcdfReader.cpp.i:
+	$(MAKE) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.i
+.PHONY : src/data/netcdf/netcdfReader.cpp.i
+
+src/data/netcdf/netcdfReader.s: src/data/netcdf/netcdfReader.cpp.s
+
+.PHONY : src/data/netcdf/netcdfReader.s
+
+# target to generate assembly for a file
+src/data/netcdf/netcdfReader.cpp.s:
+	$(MAKE) -f CMakeFiles/viewer.dir/build.make CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.s
+.PHONY : src/data/netcdf/netcdfReader.cpp.s
+
 src/viewer.o: src/viewer.cpp.o
 
 .PHONY : src/viewer.o
@@ -159,6 +186,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... viewer"
 	@echo "... edit_cache"
+	@echo "... src/data/netcdf/netcdfReader.o"
+	@echo "... src/data/netcdf/netcdfReader.i"
+	@echo "... src/data/netcdf/netcdfReader.s"
 	@echo "... src/viewer.o"
 	@echo "... src/viewer.i"
 	@echo "... src/viewer.s"

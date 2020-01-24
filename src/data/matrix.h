@@ -55,7 +55,19 @@ glm::mat4 earth_model () {
 }
 
 glm::vec3 viewDir () {
-    glm::vec4 view = cameraModel() * glm::vec4 (0.f,0.f,1.f, 1.f);
+    glm::vec4 view = glm::vec4 (0.f,0.f,1.f, 1.f);
+    return glm::vec3 (view.x, view.y, view.z);
+}
+
+glm::vec3 moonDir () {
+    // moon at 5.5f deg north
+    glm::vec4 view = glm::vec4 (-0.995f, 0.0895f, 0, 1.f);
+    return glm::vec3 (view.x, view.y, view.z);
+}
+
+glm::vec3 sunDir () {
+    // sun at 23.5 deg north
+    glm::vec4 view = glm::vec4 (0.925f, 0.379f, 0, 1.f);
     return glm::vec3 (view.x, view.y, view.z);
 }
 

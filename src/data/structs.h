@@ -8,8 +8,10 @@
 #include <GL/glut.h>
 #endif
 #include <glm/glm.hpp>
+#include <memory>
 #include <glm/gtc/quaternion.hpp>
 #include "global_defines.h"
+#include "netcdf/netcdfReader.h"
 
 
 // Camera
@@ -24,11 +26,19 @@ static struct {
     float distance;
 } camera;
 
+
 // Background Rendering 
 static const GLfloat vertex_buffer_data [] = {
     -1.0f, -1.0f,
     1.0f, -1.0f,
     -1.0f, 1.0f,
+    1.0f, 1.0f
+};
+
+static const GLfloat uv_buffer_data [] = {
+    0.f, 0.f,
+    1.0f, 0.f,
+    0.f, 1.0f,
     1.0f, 1.0f
 };
 
@@ -39,6 +49,7 @@ static const GLushort element_buffer_data [] = {
 static struct {
     GLuint vertex_buffer;
     GLuint element_buffer;
+    GLuint count;
     GLuint textures[2];
 
     GLuint vertex_shader, fragment_shader, program;
@@ -46,6 +57,7 @@ static struct {
     struct {
         GLint MVP;
         GLint textures[2];
+        GLint blurStrength;
     } uniforms;
 
     struct {
@@ -53,7 +65,7 @@ static struct {
         GLint uv;
     } attributes;
 
-    GLfloat fade_factor;
+    GLint blurStrength;
 } resources;
 
 
@@ -63,7 +75,20 @@ typedef struct {
     glm::vec2 uv;
 } vertex;
 
+enum class transportState { PLAYING, REVERSED, PAUSED, STOPPED };
+
 static struct {
+    transportState state;
+    int deltaTime;
+    int time;
+    int timeSinceStart;
+    int multiplier;
+} transportControl;
+
+static struct {
+    std::unique_ptr<netcdfReader> reader;
+    float currentTime;
+
     GLuint vertex_buffer;
     GLuint element_buffer;
     GLuint element_count;
@@ -78,6 +103,9 @@ static struct {
 
     struct {
         GLint MVP;
+        GLint M;
+        GLint V;
+        GLint P;
         GLint time;
         GLint textures[4];
         GLint viewDir;

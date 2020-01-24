@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.cpp" "/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/build/CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.o"
   "/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/viewer.cpp" "/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/build/CMakeFiles/viewer.dir/src/viewer.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

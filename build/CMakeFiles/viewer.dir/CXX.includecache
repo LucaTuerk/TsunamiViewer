@@ -34,6 +34,14 @@ structs.h
 global_defines.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/global_defines.h
 
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
+netcdf.h
+-
+string
+-
+vector
+-
+
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/resources.h
 GL/glew.h
 -
@@ -51,6 +59,8 @@ structs.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
 ../utils/TGA/tga.hpp
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/utils/TGA/tga.hpp
+../data/netcdf/netcdfReader.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
 GL/glew.h
@@ -61,10 +71,28 @@ GL/glut.h
 -
 glm/glm.hpp
 -
+memory
+-
 glm/gtc/quaternion.hpp
 -
 global_defines.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/global_defines.h
+netcdf/netcdfReader.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
+
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
+GL/glew.h
+-
+GLUT/glut.h
+-
+GL/glut.h
+-
+structs.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
+vector
+-
+glm/glm.hpp
+-
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/input/input.h
 GL/glew.h
@@ -76,6 +104,8 @@ GL/glut.h
 glm/glm.hpp
 -
 glm/gtc/quaternion.hpp
+-
+iostream
 -
 ../data/structs.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
@@ -97,6 +127,8 @@ vector
 -
 ../data/resources.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/resources.h
+../data/ui.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/render/render.h
 GL/glew.h
@@ -111,10 +143,16 @@ glm/gtc/matrix_transform.hpp
 -
 glm/gtc/type_ptr.hpp
 -
+iostream
+-
 ../data/resources.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/resources.h
 ../data/matrix.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/matrix.h
+../data/netcdf/netcdfReader.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
+../data/ui.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/utils/TGA/tga.hpp
 algorithm
@@ -133,7 +171,7 @@ GL/glew.h
 -
 GLUT/glut.h
 -
-GL/glut.h
+GL/freeglut.h
 -
 data/resources.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/resources.h
@@ -147,8 +185,16 @@ input/input.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/input/input.h
 ../res/res_defines.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/res/res_defines.h
+data/ui.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
+memory
+-
 cmath
 -
+algorithm
+-
 glm/gtc/quaternion.hpp
+-
+glm/glm.hpp
 -
 

@@ -12,6 +12,7 @@
 #include <fstream>
 #include "structs.h"
 #include "../utils/TGA/tga.hpp"
+#include "../data/netcdf/netcdfReader.h"
 
 static char * getFileContents ( const char * file, GLint * length ) {
     std::ifstream i_file;
@@ -61,16 +62,8 @@ static GLuint makeBuffer ( GLenum target, const void * bufferData, GLsizei buffe
     return buffer;
 }
 
-static GLuint makeTexture ( const std::string & file ) {
+static GLuint makeTexture (  ) {
     GLuint texture;
-    int width, height, size;
-
-    tga::TGA * img = new tga::TGA();
-    std::cout << "  Loading Texture: " << file << std::endl;
-    if(!img->Load(file))
-        return 0;
-
-
     // Generate and Bind Texture
     glGenTextures (1, &texture);
     glBindTexture (GL_TEXTURE_2D, texture);
@@ -81,6 +74,17 @@ static GLuint makeTexture ( const std::string & file ) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
+    return texture;
+}
+
+static GLuint makeTexture ( const std::string & file ) {
+    GLuint texture = makeTexture();
+
+    tga::TGA * img = new tga::TGA();
+    std::cout << "  Loading Texture: " << file << std::endl;
+    if(!img->Load(file))
+        return 0;
+
     glTexImage2D(
         GL_TEXTURE_2D, 0,   // Target, LOD
         GL_RGB8,            // internal format
@@ -90,6 +94,23 @@ static GLuint makeTexture ( const std::string & file ) {
     );
 
     delete(img);
+
+    return texture;
+}
+
+static GLuint makeTextureFromData ( bufferType type ) {
+    GLuint texture = makeTexture();
+
+    float buffer[ earth_resources.reader->getWidth() * earth_resources.reader->getHeight()];
+    earth_resources.reader-> writeBuffer ( buffer, type, 0 );
+
+    glTexImage2D (
+        GL_TEXTURE_2D, 0, 
+        GL_R32F,
+        earth_resources.reader->getWidth(), earth_resources.reader->getHeight(), 0,
+        GL_RED, GL_FLOAT,
+        buffer
+    );
 
     return texture;
 }
