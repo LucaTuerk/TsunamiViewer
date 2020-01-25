@@ -1,16 +1,23 @@
 #version 140
 
+// Display modes
+const uint modeU  = uint( 0 );
+const uint modeV  = uint( 1 );
+const uint modeUV = uint( 2 );
+const uint modeH  = uint( 3 );
+
 // transformation matricies
 uniform mat4 MVP;
 uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 
+// max min values ( for selected value u, v, speed, )
+uniform uint  displayMode;
+uniform float minVal;
+uniform float maxVal;
+
 // height textrues
-uniform sampler2D bTexture;
-uniform sampler2D hTexture;
-uniform sampler2D huTexture;
-uniform sampler2D hvTexture;
 uniform sampler2D nightTexture;
 
 // lighting vectors
@@ -24,7 +31,7 @@ varying vec3 normal;
 varying float bOver, b, h, hu, hv, random;
 
 // lighting constants
-const float ambientFac  = 0.3;
+const float ambientFac  = 0.5;
 const float specularFac = 2.;
 const vec3 sunColor     = vec3 ( 1.0, 0.85, 0.125 );
 const vec3 moonColor    = vec3 ( 0.1, 0.125, 0.4 );
@@ -77,9 +84,10 @@ void main () {
     vec3 ambientTerm = ambientFac * color;
 
     // Calculate diffuse term
-    float diffFac = (1. - ambientFac) * 
+    float diffRaw = 
         ( 0.5 * max ( dot ( worldSunDir, normNormal), 0.0 ) 
         + 0.5 *  max ( dot ( worldMoonDir, normNormal), 0.0 ));
+    float diffFac = (1. - ambientFac) * diffRaw;
 
     vec3 diffuseTerm = diffFac * color;
 
@@ -87,18 +95,25 @@ void main () {
     vec3 moonTerm =  0.50 * calculateSpecularTerm ( worldMoonDir, moonColor, normNormal, isWater);
     vec3 sunTerm =  0.50 * calculateSpecularTerm ( worldSunDir, sunColor, normNormal, isWater);
 
-    // calculate wave speed
-    float speed = sqrt(hu * hu + hv * hv);
+    float dispFactor =
+        displayMode == modeU    ? map   ( hu, minVal, maxVal, -1., 1. ) :
+        displayMode == modeV    ? map   ( hv, minVal, maxVal, -1., 1. ) :
+        displayMode == modeUV   ? map   ( hu + hv, minVal, maxVal, -1., 1. ) :
+        displayMode == modeH    ? 
+                map ( h , minVal, maxVal, -1., 1. )
+         : 0.;
 
-    vec3 main = ambientTerm + diffuseTerm + moonTerm + sunTerm;
-    if ( length (main) < 0.25 && !isWater) {
-        main += 0.5 * textureLod ( nightTexture, texcoord  * nightTexStretch, 0 ).r;
+    vec3 displayTerm = (minVal == maxVal) ? vec3 (0.,0.,0.) : max ( 0.0, dispFactor ) * vec3 (0., 0., 1.) - min ( 0.0, dispFactor ) * vec3 (1.,0.,0.); 
+
+    vec3 main = mix ( diffuseTerm, displayTerm * diffFac, isWater ? length ( displayTerm ) : 0. );
+
+    if ( diffRaw < 0.35 && !isWater) {
+        main += textureLod ( nightTexture, texcoord  * nightTexStretch, 0 ).r;
     }
 
     // Set out color
     gl_FragColor = 
          vec4( 
-         main +  
-         + speed * vec3(1.,0.,0.) 
+         main + moonTerm + sunTerm + ambientTerm
          , 1. );
 }

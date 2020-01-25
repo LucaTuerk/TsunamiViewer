@@ -48,6 +48,18 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
         case '6' :
             transportControl.multiplier = 100;
             break;
+        case 'u' :
+            earth_resources.mode = displayMode :: U;
+            break;
+        case 'v' :
+            earth_resources.mode = displayMode :: V;
+            break;
+        case 'h' :
+            earth_resources.mode = displayMode :: H;
+            break;
+        case 'c' :
+            earth_resources.mode = displayMode :: UV;
+            break;
     }
 }
 

@@ -175,6 +175,8 @@ iostream
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
 ../data/ui.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
+../data/global_defines.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/global_defines.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/utils/TGA/tga.hpp
 algorithm

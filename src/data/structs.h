@@ -85,6 +85,8 @@ static struct {
     int multiplier;
 } transportControl;
 
+enum class displayMode { U, V, UV, H };
+
 static struct {
     std::unique_ptr<netcdfReader> reader;
     float currentTime;
@@ -109,11 +111,13 @@ static struct {
         GLint M;
         GLint V;
         GLint P;
-        GLint time;
         GLint textures[5];
         GLint viewDir;
         GLint sunDir;
         GLint moonDir;
+        GLint mode;
+        GLint minVal;
+        GLint maxVal;
     } uniforms;
 
     struct {
@@ -121,7 +125,13 @@ static struct {
         GLint uv;
     } attributes;
 
-    GLfloat time;
+    displayMode mode;
+    GLfloat minVal;
+    GLfloat maxVal;
+    
+    float hMin, hMax;
+    float huMin, huMax;
+    float hvMin, hvMax;
 } earth_resources;
 
 #endif

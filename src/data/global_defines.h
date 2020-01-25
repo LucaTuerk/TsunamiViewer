@@ -1,1 +1,5 @@
 #define UP glm::vec3 (0,1,0)
+#define modeU   ((GLuint) 0)
+#define modeV   ((GLuint) 1)
+#define modeUV  ((GLuint) 2)
+#define modeH   ((GLuint) 3)

@@ -42,8 +42,8 @@ void main () {
     h       = texture2D( hTexture , texcoord).r;
     bOver   = map ( max ( .0, b), 0., maxHeight, 0., 1. );
     bPh     = makeCombinedHeight ( h, b );
-    hu      = texture2D( huTexture , texcoord).r / 500.;
-    hv      = texture2D( hvTexture , texcoord).r / 500.;
+    hu      = texture2D( huTexture, texcoord).r;
+    hv      = texture2D( hvTexture, texcoord).r;
     
     // Extend vertex along normal (normal = position on unit circle)
     vec3 pos = position.xyz * ( 1. + ( map ( ( b > 0. ? .01 * b : b ) + h, minHeight, maxHeight, 0., 1.) ) * hFac);

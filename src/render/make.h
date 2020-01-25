@@ -240,9 +240,6 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
     earth_resources.uniforms.P =
         glGetUniformLocation ( earth_resources.program, "P" );
 
-    earth_resources.uniforms.time =
-        glGetUniformLocation ( earth_resources.program, "time" );
-
     earth_resources.uniforms.viewDir =
         glGetUniformLocation ( earth_resources.program, "viewDir" );
 
@@ -251,6 +248,15 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
 
     earth_resources.uniforms.sunDir =
         glGetUniformLocation ( earth_resources.program, "sunDir" );
+
+    earth_resources.uniforms.mode =
+        glGetUniformLocation ( earth_resources.program, "displayMode" );
+
+    earth_resources.uniforms.minVal =
+        glGetUniformLocation ( earth_resources.program, "minVal" );
+
+    earth_resources.uniforms.maxVal =
+        glGetUniformLocation ( earth_resources.program, "maxVal" );
 
     earth_resources.uniforms.textures[0] =
         glGetUniformLocation ( earth_resources.program, "bTexture" );
@@ -272,6 +278,7 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
 
     earth_resources.attributes.uv =
         glGetAttribLocation ( earth_resources.program, "uv" );
+
 
     earth_resources.readBuffer.reserve ( earth_resources.reader->getWidth() * earth_resources.reader->getHeight() );
 

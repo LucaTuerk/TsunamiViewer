@@ -119,7 +119,6 @@ static void render (void) {
     renderBackground ();
     renderEarthFromData ( * earth_resources.reader, earth_resources.currentTime );
 
-
     elementIds.list.push_back ( elementIds.shadowbottom );
     elementIds.list.push_back ( elementIds.uibottom );
     elementIds.list.push_back ( elementIds.shadowtop );

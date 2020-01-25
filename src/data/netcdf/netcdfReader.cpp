@@ -6,7 +6,7 @@
 
 #define NETCDF_ERR(msg, retval) {printf("%s: %s\n", msg, nc_strerror(retval)); throw std::runtime_error(msg);}
 
-netcdfReader :: netcdfReader ( const char * filename ) {
+netcdfReader :: netcdfReader ( const char * filename ) : last ( -1 ){
     int retval;
     int varId;
     int numDims;
