@@ -103,7 +103,7 @@ static void update (void) {
 
     // Set Blur
     if ( std::abs(input.deltaMouseX) > 0 || std::abs(input.deltaMouseY) > 0)
-        resources.blurStrength = 1;
+        resources.blurStrength = 2;
     else
         resources.blurStrength = 0;
 
@@ -165,6 +165,7 @@ static void render (void) {
     }
 
     renderUI (elementIds.list);
+    elementIds.list.clear();
     renderProgressBar();
 
     glutSwapBuffers ();

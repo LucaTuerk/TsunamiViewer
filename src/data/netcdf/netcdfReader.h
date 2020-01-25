@@ -19,13 +19,15 @@ class netcdfReader {
 
     void writeBuffer ( float buffer[], bufferType type, int time) const;
 
-    int getTimeStep (float time) const noexcept;
+    int getTimeStep (float time) noexcept;
     int getMaxTimeStep() const noexcept;
     int getWidth() const noexcept;
     int getHeight() const noexcept;
     float getMaxTime () const noexcept;
+    bool requiresUpdate( float time ) const noexcept;
     private:
     float maxTime;
+    int last;
     int netCdfId;
     size_t timeLen, xLen, yLen;
     int timeId, xId, yId;

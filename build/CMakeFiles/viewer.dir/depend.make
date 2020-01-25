@@ -5,6 +5,7 @@ CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.o: ../src/data/netcdf/net
 CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.o: ../src/data/netcdf/netcdfReader.h
 
 CMakeFiles/viewer.dir/src/viewer.cpp.o: ../res/res_defines.h
+CMakeFiles/viewer.dir/src/viewer.cpp.o: ../src/data/buffersplitter.h
 CMakeFiles/viewer.dir/src/viewer.cpp.o: ../src/data/global_defines.h
 CMakeFiles/viewer.dir/src/viewer.cpp.o: ../src/data/matrix.h
 CMakeFiles/viewer.dir/src/viewer.cpp.o: ../src/data/netcdf/netcdfReader.h

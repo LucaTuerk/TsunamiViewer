@@ -32,6 +32,7 @@ const vec3 darkWater = 0.5 * vec3 (0.24, 0.25, 0.30);
 
 const float pi = 3.14159265;
 const float minHeight = -10035.;
+const float maxHeight = 6877.;
 
 float map ( float val, float minOrig, float maxOrig, float newMin, float newMax ) {
     return newMin + (val - minOrig) * (newMax - newMin) / (maxOrig - minOrig);
@@ -90,6 +91,7 @@ void main () {
 
     gl_FragColor = 
         vec4( 
-        ambientTerm + diffuseTerm + moonTerm + sunTerm + len * vec3(1.,0.,0.)
+        ambientTerm + diffuseTerm + moonTerm + sunTerm
+        // + map ( max ( h + minHeight, 0. ), 0. , 50., 0., 1.) * vec3(1.,0.,0.)
         , 1. );
 }

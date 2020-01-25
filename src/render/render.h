@@ -91,49 +91,51 @@ static void setEarthUniforms () {
     glUniform3fv ( earth_resources.uniforms.sunDir, 1, glm::value_ptr(sunDir()));
 }
 
-static void setEarthBuffers () {
-    // Set Buffers
-    glBindBuffer ( GL_ARRAY_BUFFER, earth_resources.vertex_buffer );
-    glVertexAttribPointer (
-        earth_resources.attributes.position,// attribute
-        3,                                  // size
-        GL_FLOAT,                           // type
-        GL_FALSE,                           // normalized
-        sizeof(vertex),                     // stride
-        reinterpret_cast<void*> 
-            (offsetof(vertex, position))    // offset
-    );
-    glEnableVertexAttribArray( earth_resources.attributes.position );
+static void setEarthBuffers () { 
+    for ( int i = 0; i < earth_resources.vertex_buffers.size(); i++ ) {
+        // Set Buffers
+        glBindBuffer ( GL_ARRAY_BUFFER, earth_resources.vertex_buffers[i] );
+        glVertexAttribPointer (
+            earth_resources.attributes.position,// attribute
+            3,                                  // size
+            GL_FLOAT,                           // type
+            GL_FALSE,                           // normalized
+            sizeof(vertex),                     // stride
+            reinterpret_cast<void*> 
+                (offsetof(vertex, position))    // offset
+        );
+        glEnableVertexAttribArray( earth_resources.attributes.position );
 
-    glVertexAttribPointer (
-        earth_resources.attributes.uv,  // attribute
-        2,                              // size
-        GL_FLOAT,                       // type
-        GL_FALSE,                       // normalized
-        sizeof(vertex),                 // stride
-        reinterpret_cast<void*> 
-            (offsetof(vertex, uv))      // offset
-    );
-    glEnableVertexAttribArray( earth_resources.attributes.uv );
+        glVertexAttribPointer (
+            earth_resources.attributes.uv,  // attribute
+            2,                              // size
+            GL_FLOAT,                       // type
+            GL_FALSE,                       // normalized
+            sizeof(vertex),                 // stride
+            reinterpret_cast<void*> 
+                (offsetof(vertex, uv))      // offset
+        );
+        glEnableVertexAttribArray( earth_resources.attributes.uv );
 
-    glFrontFace( GL_CW );
-    glEnable( GL_CULL_FACE );
-    glCullFace( GL_BACK );
-    glPolygonMode( GL_FRONT, GL_FILL );
-    glEnable(GL_DEPTH_TEST); 
-    glDepthFunc( GL_LESS ); 
-    glDepthMask( GL_TRUE );
+        glFrontFace( GL_CW );
+        glEnable( GL_CULL_FACE );
+        glCullFace( GL_BACK );
+        glPolygonMode( GL_FRONT, GL_FILL );
+        glEnable(GL_DEPTH_TEST); 
+        glDepthFunc( GL_LESS ); 
+        glDepthMask( GL_TRUE );
 
-    glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, earth_resources.element_buffer );
-    glDrawElements (
-        GL_TRIANGLES,                   // mode
-        earth_resources.element_count,  // count
-        GL_UNSIGNED_INT,              // type
-        (void *) 0                      // offset
-    );
+        glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, earth_resources.element_buffers[i] );
+        glDrawElements (
+            GL_TRIANGLES,                   // mode
+            earth_resources.element_counts[i],  // count
+            GL_UNSIGNED_SHORT,              // type
+            (void *) 0                      // offset
+        );
 
-    glDisableVertexAttribArray( earth_resources.attributes.position );
-    glDisableVertexAttribArray( earth_resources.attributes.uv );
+        glDisableVertexAttribArray( earth_resources.attributes.position );
+        glDisableVertexAttribArray( earth_resources.attributes.uv );
+    }
 }
 
 static void renderEarth () {
@@ -164,91 +166,100 @@ static void renderEarth () {
     setEarthBuffers();
 }
 
-static void renderEarthFromData ( const netcdfReader & reader, float time ) {
+static void renderEarthFromData ( netcdfReader & reader, float time ) {
     // Set Program for use
     glUseProgram ( earth_resources.program );
     
     // Set Uniforms
     setEarthUniforms();
 
-    float buffer[ reader.getWidth() *  reader.getHeight() ];
+    bool requires = reader.requiresUpdate( time );
+    float * buffer = & earth_resources.readBuffer [0];
     // Set Textures b, h, hu, hv
     glActiveTexture ( GL_TEXTURE0 );
     glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[0] );
-    reader.writeBuffer(buffer, bufferType::B, reader.getTimeStep(time));  
+    if (requires) {
+        std::cout << "updating" << std::endl << std::flush;
+        reader.writeBuffer(buffer, bufferType::B, reader.getTimeStep(time));  
 
-    glTexSubImage2D( 
-        GL_TEXTURE_2D,                  // texture
-        0,                              // lod level
-        0,                              // x Offset
-        0,                              // y Offset
-        reader.getWidth(),              // width
-        reader.getHeight(),             // height
-        GL_RED,                        // format
-        GL_FLOAT,                       // type
-        &buffer[0]                      // pointer
-    ); 
+        glTexSubImage2D( 
+            GL_TEXTURE_2D,                  // texture
+            0,                              // lod level
+            0,                              // x Offset
+            0,                              // y Offset
+            reader.getWidth(),              // width
+            reader.getHeight(),             // height
+            GL_RED,                        // format
+            GL_FLOAT,                       // type
+            &buffer[0]                      // pointer
+        ); 
+    }
+
     glUniform1i ( earth_resources.uniforms.textures[0], 0 );
 
     glActiveTexture ( GL_TEXTURE1 );
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[1] );
-    reader.writeBuffer(buffer, bufferType::H, reader.getTimeStep(time));  
+    if (requires) {
+        reader.writeBuffer(buffer, bufferType::H, reader.getTimeStep(time));  
 
-    glTexSubImage2D( 
-        GL_TEXTURE_2D,                  // texture
-        0,                              // lod level
-        0,                              // x Offset
-        0,                              // y Offset
-        reader.getWidth(),              // width
-        reader.getHeight(),             // height
-        GL_RED,                        // format
-        GL_FLOAT,                       // type
-        &buffer[0]                      // pointer
-    ); 
-
+        glTexSubImage2D( 
+            GL_TEXTURE_2D,                  // texture
+            0,                              // lod level
+            0,                              // x Offset
+            0,                              // y Offset
+            reader.getWidth(),              // width
+            reader.getHeight(),             // height
+            GL_RED,                        // format
+            GL_FLOAT,                       // type
+            &buffer[0]                      // pointer
+        ); 
+    }
     glUniform1i ( earth_resources.uniforms.textures[1], 1 );
 
     glActiveTexture ( GL_TEXTURE2 );
     glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[2] );
-    reader.writeBuffer(buffer, bufferType::HU, reader.getTimeStep(time));  
+    if ( requires ) {
+        reader.writeBuffer(buffer, bufferType::HU, reader.getTimeStep(time));  
 
-    glTexSubImage2D( 
-        GL_TEXTURE_2D,                  // texture
-        0,                              // lod level
-        0,                              // x Offset
-        0,                              // y Offset
-        reader.getWidth(),              // width
-        reader.getHeight(),             // height
-        GL_RED,                        // format
-        GL_FLOAT,                       // type
-        &buffer[0]                      // pointer
-    ); 
+        glTexSubImage2D( 
+            GL_TEXTURE_2D,                  // texture
+            0,                              // lod level
+            0,                              // x Offset
+            0,                              // y Offset
+            reader.getWidth(),              // width
+            reader.getHeight(),             // height
+            GL_RED,                        // format
+            GL_FLOAT,                       // type
+            &buffer[0]                      // pointer
+        ); 
+    }
 
     glUniform1i ( earth_resources.uniforms.textures[2], 2 );
 
     glActiveTexture ( GL_TEXTURE3 );
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[3] );
-    reader.writeBuffer(buffer, bufferType::HV, reader.getTimeStep(time));
+    if ( requires ) {
+        reader.writeBuffer(buffer, bufferType::HV, reader.getTimeStep(time));
 
-    glTexSubImage2D( 
-        GL_TEXTURE_2D,                  // texture
-        0,                              // lod level
-        0,                              // x Offset
-        0,                              // y Offset
-        reader.getWidth(),              // width
-        reader.getHeight(),             // height
-        GL_RED,                        // format
-        GL_FLOAT,                       // type
-        &buffer[0]                      // pointer
-    ); 
-
+        glTexSubImage2D( 
+            GL_TEXTURE_2D,                  // texture
+            0,                              // lod level
+            0,                              // x Offset
+            0,                              // y Offset
+            reader.getWidth(),              // width
+            reader.getHeight(),             // height
+            GL_RED,                        // format
+            GL_FLOAT,                       // type
+            &buffer[0]                      // pointer
+        ); 
+    }
     glUniform1i ( earth_resources.uniforms.textures[3], 3 );
 
     // Set Buffers
     setEarthBuffers();
 }
 
-static void renderUI ( std::vector<int> elements ) {
+static void renderUI ( const std::vector<int> & elements ) {
     if (elements.size() == 0)
         return;
 
@@ -268,8 +279,6 @@ static void renderUI ( std::vector<int> elements ) {
  
     glDepthFunc( GL_ALWAYS ); 
     glDisable( GL_CULL_FACE );
-    glEnable ( GL_BLEND );
-    glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glBindBuffer ( GL_ELEMENT_ARRAY_BUFFER, ui.index_buffer );
 
@@ -291,7 +300,6 @@ static void renderUI ( std::vector<int> elements ) {
             (void *) 0                      // offset
         );
     }
-    elements.clear();
 
     glDisableVertexAttribArray( ui.attributes.uv );
 }

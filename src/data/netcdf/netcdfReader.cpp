@@ -109,8 +109,9 @@ void netcdfReader :: writeBuffer ( float buffer[], bufferType type, int timeStep
     }
 }
 
-int netcdfReader :: getTimeStep ( float time ) const noexcept {
-    return std::min ( 0.99f , std::max ( 0.f, time ) ) * timeLen;
+int netcdfReader :: getTimeStep ( float time ) noexcept {
+    last = (int) (std::min ( 1.f , std::max ( 0.f, time ) ) * timeLen);
+    return last;
 }
 
 int netcdfReader :: getMaxTimeStep() const noexcept {
@@ -127,4 +128,8 @@ int netcdfReader :: getWidth () const noexcept {
 
 int netcdfReader :: getHeight () const noexcept {
     return yLen;
+}
+
+bool netcdfReader :: requiresUpdate ( float time ) const noexcept {
+    return (int) (std::min ( 1.f , std::max ( 0.f, time ) ) * timeLen) != last;
 }

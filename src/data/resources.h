@@ -69,7 +69,7 @@ static GLuint makeTexture (  ) {
     glBindTexture (GL_TEXTURE_2D, texture);
 
     // Set Texture Parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
@@ -79,6 +79,9 @@ static GLuint makeTexture (  ) {
 
 static GLuint makeTexture ( const std::string & file ) {
     GLuint texture = makeTexture();
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
     tga::TGA * img = new tga::TGA();
     std::cout << "  Loading Texture: " << file << std::endl;

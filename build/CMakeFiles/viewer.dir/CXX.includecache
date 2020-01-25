@@ -8,6 +8,24 @@
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/res/res_defines.h
 
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/buffersplitter.h
+GL/glew.h
+-
+GLUT/glut.h
+-
+GL/glut.h
+-
+glm/glm.hpp
+-
+vector
+-
+structs.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
+map
+-
+climits
+-
+
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/global_defines.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/matrix.h
@@ -129,6 +147,10 @@ vector
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/resources.h
 ../data/ui.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
+../data/buffersplitter.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/buffersplitter.h
+../data/structs.h
+/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/structs.h
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/render/render.h
 GL/glew.h

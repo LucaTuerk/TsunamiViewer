@@ -16,7 +16,8 @@ set ( VIEWER_SOURCES
 set ( VIEWER_HEADERS
 )
 
-find_package( glm REQUIRED )
+find_path ( glm_DIR glm.hpp )
+find_package ( glm REQUIRED )
 
 set (VIEWER_LIBS 
     GL

@@ -89,9 +89,12 @@ static struct {
     std::unique_ptr<netcdfReader> reader;
     float currentTime;
 
-    GLuint vertex_buffer;
-    GLuint element_buffer;
-    GLuint element_count;
+    std::vector < GLuint > vertex_buffers;
+    std::vector < GLuint > element_buffers;
+    std::vector < GLuint > element_counts;
+
+    std::vector<float> readBuffer;
+
     GLuint textures[4]; // b, h, hu, hv 
 
     // Transform

@@ -13,6 +13,8 @@
 #include <vector>
 #include "../data/resources.h"
 #include "../data/ui.h"
+#include "../data/buffersplitter.h"
+#include "../data/structs.h"
 
 static float lerp (float a, float b, float t) {
     return (1-t) * a + t * b;
@@ -20,10 +22,8 @@ static float lerp (float a, float b, float t) {
 
 // Following http://www.songho.ca/opengl/gl_sphere.html
 template < typename I >
-static int makeUVSphere ( int nLat, int nLon, GLuint & vertexBuffer, GLuint & indexBuffer, GLuint & count) {
+static int makeUVSphere ( int nLat, int nLon, std::vector < vertex > & data, std::vector < I > & indices ) {
     std::cout << "Making UV " << (nLat + 1) * (nLon + 1) + 2 << std::endl;
-    std::vector<vertex> data;
-    std::vector<I> indices;
 
     data.push_back( { glm::vec4 (0,1,0,1), glm::vec2(0,0) } );
 
@@ -72,31 +72,32 @@ static int makeUVSphere ( int nLat, int nLon, GLuint & vertexBuffer, GLuint & in
 
     std::cout << data.size() << " " << indices.size() << std::endl;
 
-    vertexBuffer = makeBuffer (
-        GL_ARRAY_BUFFER,
-        (void *) &data[0],
-        data.size() * sizeof(vertex)
-    );
-
-    indexBuffer = makeBuffer (
-        GL_ELEMENT_ARRAY_BUFFER,
-        (void *) &indices[0],
-        indices.size() * sizeof(I)
-    );
-
-    count = indices.size();
-
     return 1;
 }
 
 static int makeBackground ( const char * tex1, const char * tex2, const char * vert, const char * frag ) {
     std::cout << "Making Background Resources" << std::endl;
 
+    std::vector < vertex > vertexB;
+    std::vector < GLushort > indexB;
+
     if ( !makeUVSphere <GLushort> (200, 200,
-            resources.vertex_buffer,
-            resources.element_buffer,
-            resources.count) ) 
+            vertexB, indexB) ) 
         return 0;
+
+    resources.vertex_buffer = makeBuffer ( 
+            GL_ARRAY_BUFFER,
+            (void *) &vertexB[0],
+            vertexB.size() * sizeof( vertex )
+        );
+
+    resources.element_buffer = makeBuffer (
+        GL_ELEMENT_ARRAY_BUFFER,
+        (void *) &indexB[0],
+        indexB.size() * sizeof( GLushort )
+    );
+
+    resources.count = indexB.size();
 
     // Make Textures
     resources.textures[0] = makeTexture ( tex1 );
@@ -158,11 +159,34 @@ static int makeBackground ( const char * tex1, const char * tex2, const char * v
 static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag ) {
     std::cout << "Making Earth Resources" << std::endl; 
     // Make Geometry
+    std::vector < vertex > vertexB;
+    std::vector < GLuint > indexB;
     if ( !makeUVSphere <GLuint> (nLat, nLon, 
-                    earth_resources.vertex_buffer, 
-                    earth_resources.element_buffer, 
-                    earth_resources.element_count) ) 
+                    vertexB, indexB) ) 
         return 0;
+
+    std::vector < std::vector < vertex > > vertBuffers;
+    std::vector < std::vector < GLushort > > indBuffers;
+
+    // Split buffers to allow for GLushort indexing
+    splitBuffers ( vertexB, indexB, vertBuffers, indBuffers );
+
+    for ( int i = 0; i < vertBuffers.size () && i < indBuffers.size (); i++ ) {
+        earth_resources.vertex_buffers.push_back ( makeBuffer ( 
+            GL_ARRAY_BUFFER,
+            (void *) & (vertBuffers[i][0]),
+            vertBuffers[0].size() * sizeof(vertex)
+        ) );
+
+        earth_resources.element_buffers.push_back ( makeBuffer (
+            GL_ELEMENT_ARRAY_BUFFER,
+            (void *) & (indBuffers[i][0]),
+            indBuffers.at(i).size() * sizeof( GLushort )
+        ) );
+
+        earth_resources.element_counts.push_back ( indBuffers.at(0).size() );
+    }
+    
 
     // Make Textures
     earth_resources.textures[0] = makeTextureFromData ( bufferType :: B );
@@ -244,6 +268,8 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag 
 
     earth_resources.attributes.uv =
         glGetAttribLocation ( earth_resources.program, "uv" );
+
+    earth_resources.readBuffer.reserve ( earth_resources.reader->getWidth() * earth_resources.reader->getHeight() );
 
     return 1;
 }
