@@ -30,7 +30,7 @@ static int makeResources (void) {
     earth_resources.reader = std::make_unique< netcdfReader > ("../res/netcdf/200122-sm_00.nc");
     if ( ! makeBackground ( NICE_SKY, STARS_TEX, VERT, FRAG ) )
         return 0;
-    if ( ! makeEarth( earth_resources.reader->getHeight() / 2, earth_resources.reader->getWidth() / 2, EARTH_VERT, EARTH_FRAG) )
+    if ( ! makeEarth( earth_resources.reader->getHeight() / 2, earth_resources.reader->getWidth() / 2, EARTH_VERT, EARTH_FRAG, NIGHT) )
         return 0;
     if ( ! makeProgressbar ( PROGRESS_VERT, PROGRESS_FRAG) )
         return 0;
@@ -117,7 +117,7 @@ static void render (void) {
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
     
     renderBackground ();
-    renderEarthFromData ( * earth_resources.reader, earth_resources.currentTime);
+    renderEarthFromData ( * earth_resources.reader, earth_resources.currentTime );
 
 
     elementIds.list.push_back ( elementIds.shadowbottom );

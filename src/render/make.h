@@ -156,7 +156,7 @@ static int makeBackground ( const char * tex1, const char * tex2, const char * v
     return 1;
 }
 
-static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag ) {
+static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag, std::string night) {
     std::cout << "Making Earth Resources" << std::endl; 
     // Make Geometry
     std::vector < vertex > vertexB;
@@ -193,6 +193,7 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag 
     earth_resources.textures[1] = makeTextureFromData ( bufferType :: H );
     earth_resources.textures[2] = makeTextureFromData ( bufferType :: HU );
     earth_resources.textures[3] = makeTextureFromData ( bufferType :: HV );
+    earth_resources.textures[4] = makeTexture ( night );
 
     if ( earth_resources.textures[0] == 0 || earth_resources.textures[1] == 0 || 
         earth_resources.textures[2] == 0 || earth_resources.textures[3] == 0 ) {
@@ -262,6 +263,9 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag 
     
     earth_resources.uniforms.textures[3] =
         glGetUniformLocation ( earth_resources.program, "huTexture" );
+
+    earth_resources.uniforms.textures[4] =
+        glGetUniformLocation ( earth_resources.program, "nightTexture" );
 
     earth_resources.attributes.position =
         glGetAttribLocation ( earth_resources.program, "position" );

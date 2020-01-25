@@ -8,6 +8,7 @@
 #define NE_HEIGHT "../res/tex/earthbump1k.tga"
 #define NE_CLOUD "../res/tex/earthcloudmap1k.tga"
 #define NE_LIGHT "../res/tex/earthlights1k.tga"
+#define NIGHT "../res/tex/EarthNight.tga"
 
 #define STARS_TEX "../res/tex/stars.tga"
 #define NICE_SKY "../res/tex/stars_high.tga"

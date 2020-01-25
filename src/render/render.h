@@ -162,6 +162,10 @@ static void renderEarth () {
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[3] );
     glUniform1i ( earth_resources.uniforms.textures[3], 3 );
 
+    glActiveTexture ( GL_TEXTURE4 );
+    glBindTexture (GL_TEXTURE_2D, earth_resources.textures[4] );
+    glUniform1i ( earth_resources.uniforms.textures[4], 4);
+
     // Set Buffers
     setEarthBuffers();
 }
@@ -254,6 +258,10 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
         ); 
     }
     glUniform1i ( earth_resources.uniforms.textures[3], 3 );
+
+    glActiveTexture ( GL_TEXTURE4 );
+    glBindTexture (GL_TEXTURE_2D, earth_resources.textures[4] );
+    glUniform1i ( earth_resources.uniforms.textures[4], 4);
 
     // Set Buffers
     setEarthBuffers();

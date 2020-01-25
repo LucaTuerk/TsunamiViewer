@@ -110,7 +110,7 @@ static struct {
         GLint V;
         GLint P;
         GLint time;
-        GLint textures[4];
+        GLint textures[5];
         GLint viewDir;
         GLint sunDir;
         GLint moonDir;
