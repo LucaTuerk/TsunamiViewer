@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/glm.hpp>
+#include <string>
 
 static int makeResources (void) {
     camera.fov = 100.f;
@@ -27,10 +28,23 @@ static int makeResources (void) {
     camera.location = glm::vec3(0.,0.,5.);
     camera.theta = 0;
 
-    earth_resources.reader = std::make_unique< netcdfReader > ("../res/netcdf/200122-sm_00.nc");
+    earth_resources.reader = std::make_unique< netcdfReader > (commandLine.filePath.c_str());
+    
+    earth_resources.minMaxCalculated = std::vector<bool> ( 
+        earth_resources.reader->getMaxTimeStep(), false
+    );
+    earth_resources.hMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.hMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.huMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.huMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.hvMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.hvMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
+
+    earth_resources.ambient = 0.45;
+
     if ( ! makeBackground ( NICE_SKY, STARS_TEX, VERT, FRAG ) )
         return 0;
-    if ( ! makeEarth( earth_resources.reader->getHeight() / 2, earth_resources.reader->getWidth() / 2, EARTH_VERT, EARTH_FRAG, NIGHT) )
+    if ( ! makeEarth( earth_resources.reader->getHeight() / commandLine.divisor, earth_resources.reader->getWidth() / commandLine.divisor, EARTH_VERT, EARTH_FRAG, NIGHT) )
         return 0;
     if ( ! makeProgressbar ( PROGRESS_VERT, PROGRESS_FRAG) )
         return 0;
@@ -68,6 +82,8 @@ static int makeResources (void) {
         makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X100 );
     elementIds.times200 = 
         makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X200 );
+    elementIds.help =
+        makeUIElement ( glm::vec2(-1,1), glm::vec2 (2,2), HELP );
 
 
     transportControl.timeSinceStart = 0;
@@ -85,6 +101,7 @@ static void update (void) {
 
     int max = int (1000.f * earth_resources.reader->getMaxTime());
 
+    // Update transport
     if ( transportControl.state == transportState :: PLAYING )
         transportControl.time += transportControl.deltaTime * transportControl.multiplier;
     else if ( transportControl.state == transportState :: REVERSED )
@@ -94,6 +111,26 @@ static void update (void) {
             transportControl.time = 0;
 
     transportControl.time = std::clamp ( transportControl.time, 0, max);
+    
+    // Update lighting
+    if ( input.ambientUp ) {
+        earth_resources.ambient = std::min ( 1., 
+                    earth_resources.ambient + (float) transportControl.deltaTime / 2000. );
+        input.ambientUp = false;
+    }
+    if ( input.ambientDown ) {
+        earth_resources.ambient = std::max ( 0., 
+            earth_resources.ambient - (float) transportControl.deltaTime / 2000. );
+        input.ambientDown = false;
+    }
+    if ( input.lightLeft ) {
+        camera.lightingLambda += (float) transportControl.deltaTime / 2000.;
+        input.lightLeft = false;
+    }
+    if ( input.lightRight ) {
+        camera.lightingLambda -= (float) transportControl.deltaTime / 2000.;
+        input.lightRight = false;
+    }
     
     // Update aspect ratio
     camera.aspectRatio = (float) glutGet( GLUT_WINDOW_WIDTH ) / (float) glutGet( GLUT_WINDOW_HEIGHT );
@@ -120,8 +157,13 @@ static void render (void) {
     renderEarthFromData ( * earth_resources.reader, earth_resources.currentTime );
 
     elementIds.list.push_back ( elementIds.shadowbottom );
-    elementIds.list.push_back ( elementIds.uibottom );
     elementIds.list.push_back ( elementIds.shadowtop );
+
+    if ( input.showHelp ) {
+        elementIds.list.push_back ( elementIds.help );
+    }
+
+    elementIds.list.push_back ( elementIds.uibottom );
     elementIds.list.push_back ( elementIds.uitop );
 
     switch ( transportControl.multiplier ) {
@@ -165,6 +207,7 @@ static void render (void) {
 
     renderUI (elementIds.list);
     elementIds.list.clear();
+
     renderProgressBar();
 
     glutSwapBuffers ();
@@ -173,6 +216,47 @@ static void render (void) {
 
 int main (int argc, char ** argv) {
     glutInit(&argc, argv);
+    // Parse command line params
+    for ( int i = 1; i + 1 < argc; i+= 2 ) {
+        if ( 
+            strcmp ( "-f", argv[i]) == 0 ||
+            strcmp ( "--file-path", argv[i]) == 0){
+
+            commandLine.filePath = std::string( argv[i+1] );
+        }
+        else if ( 
+            strcmp ( "-d", argv[i] ) == 0 ||
+            strcmp ( "-size-divisor", argv[i]) == 0) {
+            try {
+                commandLine.divisor = std::stoi( argv[i+1]);
+            }
+            catch (std::invalid_argument const &e)
+            {
+                std::cerr << "Abort! Divisor input " << argv[i+1] << " invalid" << std::endl;
+                return 1;
+            }
+            catch (std::out_of_range const &e)
+            {
+                std::cerr << "Abort! Divisor input " << argv[i+1] << " out of range" << std::endl;
+                return 1;
+            }
+            if ( commandLine.divisor < 1 ) {
+                std::cerr << "Abort! " << commandLine.divisor << " is an invalid size divisor" << std::endl;
+                return 1;
+            } 
+            if ( commandLine.divisor > 20 ) {
+                std::cerr << "Warning! " << commandLine.divisor << " too large for size divisor."  << std::endl;
+            }
+        }
+        else {
+            std::cerr << "Abort! Unkown commandline parameters: " << argv[i] << " " << argv[i+1] << std::endl;
+            return 1;
+        }
+    }
+    std::cout   << "Parsed Command Line Parameters " << std::endl
+                << "  File Path: " << commandLine.filePath << std::endl 
+                << "  Size Div.: " << commandLine.divisor << std::endl << std::flush;
+
     glutInitDisplayMode ( GLUT_DEPTH | GLUT_RGB | GLUT_DOUBLE );
     glutInitWindowSize(800, 640);
     glutCreateWindow("Tsunami Viewer");
@@ -181,6 +265,7 @@ int main (int argc, char ** argv) {
     glutPassiveMotionFunc(&mousePassive);
     glutMotionFunc(&mouseActive);
     glutKeyboardFunc(&keyboardFunc);
+    glutKeyboardUpFunc(&keyboardUpFunc);
     glutSpecialFunc(&specialFunc);
     glutIdleFunc(&update);
 

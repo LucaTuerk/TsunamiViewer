@@ -86,11 +86,13 @@ static void setEarthUniforms () {
     glUniformMatrix4fv ( earth_resources.uniforms.M, 1, GL_FALSE, glm::value_ptr ( earth_model()) );
     glUniformMatrix4fv ( earth_resources.uniforms.V, 1, GL_FALSE, glm::value_ptr ( view() ) );
     glUniformMatrix4fv ( earth_resources.uniforms.P, 1, GL_FALSE, glm::value_ptr ( projection() ) );
-    glUniform3fv ( earth_resources.uniforms.viewDir, 1, glm::value_ptr(viewDir()));
-    glUniform3fv ( earth_resources.uniforms.moonDir, 1, glm::value_ptr(moonDir()));
-    glUniform3fv ( earth_resources.uniforms.sunDir, 1, glm::value_ptr(sunDir()));
+    glUniformMatrix4fv ( earth_resources.uniforms.LRot, 1, GL_FALSE, glm::value_ptr ( lightingRot() ));
+    glUniform4fv ( earth_resources.uniforms.viewDir, 1, glm::value_ptr(viewDir()));
+    glUniform4fv ( earth_resources.uniforms.moonDir, 1, glm::value_ptr(moonDir()));
+    glUniform4fv ( earth_resources.uniforms.sunDir, 1,  glm::value_ptr(sunDir()));
     glUniform1f ( earth_resources.uniforms.minVal, earth_resources.minVal );
     glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.maxVal );
+    glUniform1f ( earth_resources.uniforms.ambient, earth_resources.ambient );
 
     switch ( earth_resources.mode ) {
         case displayMode :: H :
@@ -195,24 +197,76 @@ static void renderEarth () {
     setEarthBuffers();
 }
 
-static float minimum () {
+static float minimum ( float time, std::vector<float> & minV ) { 
+    int step = earth_resources.reader->getTimeStep(time);
+    if ( earth_resources.minMaxCalculated[ step ]) {
+        return minV[step];
+    }
+
     int dim = earth_resources.reader->getHeight() * earth_resources.reader->getWidth();
     float * ptr = & earth_resources.readBuffer[0];
-    float min = FLT_MAX;
+    float mini = FLT_MAX;
     for ( int i = 0; i < dim; i++ ) {
-        min = min < ptr[i] ? min : ptr[i];
+        mini = mini < ptr[i] ? mini : ptr[i];
     }
-    return min;
+    minV[step] = mini;
+    return mini;
 }
 
-static float maximum () {
+static float maximum ( float time, std::vector<float> & maxV  ) {
+    int step = earth_resources.reader->getTimeStep(time);
+    if ( earth_resources.minMaxCalculated[ step ]) {
+        return maxV[step];
+    }
+
     int dim = earth_resources.reader->getHeight() * earth_resources.reader->getWidth();
     float * ptr = & earth_resources.readBuffer[0];
-    float max = FLT_MIN;
+    float maxi = FLT_MIN;
     for ( int i = 0; i < dim; i++ ) {
-        max = max > ptr[i] ? max : ptr[i];
+        maxi = maxi > ptr[i] ? maxi : ptr[i];
     }
-    return max;
+    maxV[step] = maxi;
+    return maxi;
+}
+
+static float minimumH ( float time, std::vector<float> & minV  ) {
+    int step = earth_resources.reader->getTimeStep(time);
+    if ( earth_resources.minMaxCalculated[ step ]) {
+        return minV[step];
+    }
+
+    int dim = earth_resources.reader->getHeight() * earth_resources.reader->getWidth();
+    float * ptr = & earth_resources.readBuffer[0];
+    float * bPtr= & earth_resources.bBuffer[0];
+    float mini = FLT_MAX;
+    for ( int i = 0; i < dim; i++ ) {
+        if (ptr[i] != 0. ) {
+            float val =  ptr[i] + bPtr[i];
+            mini = mini < val ? mini : val;
+        }
+    }
+    minV[step] = mini;
+    return mini;
+}
+
+static float maximumH ( float time, std::vector<float> & maxV ) {
+    int step = earth_resources.reader->getTimeStep(time);
+    if ( earth_resources.minMaxCalculated[ step ]) {
+        return maxV[step];
+    }
+
+    int dim = earth_resources.reader->getHeight() * earth_resources.reader->getWidth();
+    float * ptr = & earth_resources.readBuffer[0];
+    float * bPtr= & earth_resources.bBuffer[0];
+    float maxi = FLT_MIN;
+    for ( int i = 0; i < dim; i++ ) {
+        if ( ptr[i] != 0 ) {
+            float val =  ptr[i] + bPtr[i];
+            maxi = maxi > val ? maxi : val;
+        }
+    }
+    maxV[step] = maxi;
+    return maxi;
 }
 
 
@@ -226,8 +280,6 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glActiveTexture ( GL_TEXTURE0 );
     glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[0] );
     if (requires) {
-        std::cout << "updating" << std::endl << std::flush;
-        reader.writeBuffer(buffer, bufferType::B, reader.getTimeStep(time));
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -236,9 +288,9 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
             0,                              // y Offset
             reader.getWidth(),              // width
             reader.getHeight(),             // height
-            GL_RED,                        // format
+            GL_RED,                         // format
             GL_FLOAT,                       // type
-            &buffer[0]                      // pointer
+            &earth_resources.bBuffer[0]     // pointer
         ); 
     }
 
@@ -248,8 +300,8 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[1] );
     if (requires) {
         reader.writeBuffer(buffer, bufferType::H, reader.getTimeStep(time));  
-        earth_resources.hMin = minimum();
-        earth_resources.hMax = maximum();
+        earth_resources.hMin = minimumH(time, earth_resources.hMinV);
+        earth_resources.hMax = maximumH(time, earth_resources.hMaxV);
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -269,8 +321,8 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[2] );
     if ( requires ) {
         reader.writeBuffer(buffer, bufferType::HU, reader.getTimeStep(time));  
-        earth_resources.huMin = minimum();
-        earth_resources.huMax = maximum();
+        earth_resources.huMin = minimum(time, earth_resources.huMinV);
+        earth_resources.huMax = maximum(time, earth_resources.huMaxV);
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -291,8 +343,8 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[3] );
     if ( requires ) {
         reader.writeBuffer(buffer, bufferType::HV, reader.getTimeStep(time));
-        earth_resources.hvMin = minimum();
-        earth_resources.hvMax = maximum();
+        earth_resources.hvMin = minimum(time, earth_resources.hvMinV);
+        earth_resources.hvMax = maximum(time, earth_resources.hvMaxV);
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -311,6 +363,10 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glActiveTexture ( GL_TEXTURE4 );
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[4] );
     glUniform1i ( earth_resources.uniforms.textures[4], 4);
+
+    earth_resources.minMaxCalculated[
+        earth_resources.reader->getTimeStep(time)
+    ] = true;
 
     // Set Uniforms
     setEarthUniforms();

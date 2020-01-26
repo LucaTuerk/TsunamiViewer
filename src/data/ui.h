@@ -39,6 +39,7 @@ static struct {
 } ui;
 
 static struct {
+    int help;
     int play, reverse, pause, stop;
     int uibottom, uitop, shadowbottom, shadowtop;
     int times1,

@@ -12,6 +12,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include "global_defines.h"
 #include "netcdf/netcdfReader.h"
+#include <vector>
 
 
 // Camera
@@ -23,6 +24,7 @@ static struct {
     // position to earth
     float theta = M_PI / 2;
     float lambda = 0;
+    float lightingLambda;
     float distance;
 } camera;
 
@@ -96,6 +98,7 @@ static struct {
     std::vector < GLuint > element_counts;
 
     std::vector<float> readBuffer;
+    std::vector<float> bBuffer;
 
     GLuint textures[4]; // b, h, hu, hv 
 
@@ -111,6 +114,7 @@ static struct {
         GLint M;
         GLint V;
         GLint P;
+        GLint LRot;
         GLint textures[5];
         GLint viewDir;
         GLint sunDir;
@@ -118,6 +122,7 @@ static struct {
         GLint mode;
         GLint minVal;
         GLint maxVal;
+        GLint ambient;
     } uniforms;
 
     struct {
@@ -129,9 +134,13 @@ static struct {
     GLfloat minVal;
     GLfloat maxVal;
     
-    float hMin, hMax;
-    float huMin, huMax;
-    float hvMin, hvMax;
+    GLfloat hMin, hMax;
+    GLfloat huMin, huMax;
+    GLfloat hvMin, hvMax;
+    GLfloat ambient;
+
+    std::vector <float> hMinV, hMaxV, huMinV, huMaxV, hvMinV, hvMaxV;
+    std::vector <bool> minMaxCalculated;
 } earth_resources;
 
 #endif

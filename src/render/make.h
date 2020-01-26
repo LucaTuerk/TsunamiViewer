@@ -240,6 +240,9 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
     earth_resources.uniforms.P =
         glGetUniformLocation ( earth_resources.program, "P" );
 
+    earth_resources.uniforms.LRot =
+        glGetUniformLocation ( earth_resources.program, "LRot" );
+
     earth_resources.uniforms.viewDir =
         glGetUniformLocation ( earth_resources.program, "viewDir" );
 
@@ -257,6 +260,9 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
 
     earth_resources.uniforms.maxVal =
         glGetUniformLocation ( earth_resources.program, "maxVal" );
+
+    earth_resources.uniforms.ambient =
+        glGetUniformLocation ( earth_resources.program, "ambientFac" );
 
     earth_resources.uniforms.textures[0] =
         glGetUniformLocation ( earth_resources.program, "bTexture" );

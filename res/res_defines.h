@@ -13,6 +13,7 @@
 #define STARS_TEX "../res/tex/stars.tga"
 #define NICE_SKY "../res/tex/stars_high.tga"
 
+#define HELP "../res/tex/help.tga"
 #define TRANSPORT "../res/tex/transport.tga"
 #define PLAY "../res/tex/play.tga"
 #define REVERSE "../res/tex/reverse.tga"
@@ -40,3 +41,4 @@
 
 #define UI_VERT  "../res/shaders/ui_vert.v.glsl"
 #define UI_FRAG  "../res/shaders/ui_frag.f.glsl"
+

@@ -15,6 +15,11 @@
 #define SPACEBAR 32
 
 static struct {
+    std::string filePath = "../res/netcdf/200122-sm_00.nc";
+    int divisor = 1;
+} commandLine;
+
+static struct {
     int mouseX, mouseY;
     int deltaMouseX, deltaMouseY;
     int mouseWheel;
@@ -23,12 +28,17 @@ static struct {
     float scrollSensitivity = 0.5f;
 
     bool mouseClicked;
+    bool ambientUp, ambientDown, lightLeft, lightRight;
+    bool showHelp;
 } input;
 
 static void keyboardFunc ( unsigned char key, int x, int y ) {
     switch ( key ) {
         case SPACEBAR :
-            transportControl.state = transportState :: PAUSED;
+            transportControl.state = 
+                transportControl.state == transportState :: PAUSED ?
+                transportState :: PLAYING
+                : transportState :: PAUSED;
             break;
         case '1' :
             transportControl.multiplier = 1;
@@ -48,6 +58,15 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
         case '6' :
             transportControl.multiplier = 100;
             break;
+        case '7' :
+            transportControl.multiplier = 200;
+            break;
+        case '8' :
+            transportControl.multiplier = 400;
+            break;
+        case '9' :
+            transportControl.multiplier = 750;
+            break;
         case 'u' :
             earth_resources.mode = displayMode :: U;
             break;
@@ -59,6 +78,29 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
             break;
         case 'c' :
             earth_resources.mode = displayMode :: UV;
+            break;
+        case 'w' :
+            input.ambientUp = true;
+            break;
+        case 's' :
+            input.ambientDown = true;
+            break;
+        case 'a' :
+            input.lightLeft = true;
+            break;
+        case 'd' :
+            input.lightRight = true;
+            break;
+        case 27 : // Escape key
+            input.showHelp = true;
+            break;
+    }
+}
+
+static void keyboardUpFunc ( unsigned char key, int x, int y ) {
+    switch ( key ) {
+        case 27 : // Escape key
+            input.showHelp = false;
             break;
     }
 }
@@ -118,7 +160,7 @@ static void updateCamera () {
     camera.distance = std::min ( 
             50.f, 
             std::max ( 
-                -3.f, 
+                1.f, 
                 camera.distance + 
                 distScaling * input.scrollSensitivity * input.mouseWheel));
                 input.mouseWheel = 0;

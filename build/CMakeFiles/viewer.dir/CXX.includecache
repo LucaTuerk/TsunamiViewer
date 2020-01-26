@@ -97,6 +97,8 @@ global_defines.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/global_defines.h
 netcdf/netcdfReader.h
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/netcdf/netcdfReader.h
+vector
+-
 
 /mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/src/data/ui.h
 GL/glew.h
@@ -220,5 +222,7 @@ algorithm
 glm/gtc/quaternion.hpp
 -
 glm/glm.hpp
+-
+string
 -
 

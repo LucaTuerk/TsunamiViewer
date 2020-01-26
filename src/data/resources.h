@@ -105,14 +105,19 @@ static GLuint makeTextureFromData ( bufferType type ) {
     GLuint texture = makeTexture();
 
     float buffer[ earth_resources.reader->getWidth() * earth_resources.reader->getHeight()];
-    earth_resources.reader-> writeBuffer ( buffer, type, 0 );
+    if ( type == bufferType :: B) {
+        earth_resources.bBuffer.reserve (earth_resources.reader->getWidth() * earth_resources.reader->getHeight());
+        earth_resources.reader-> writeBuffer ( & earth_resources.bBuffer[0], type, 0);
+    } else {
+        earth_resources.reader-> writeBuffer ( buffer, type, 0 );
+    }
 
     glTexImage2D (
         GL_TEXTURE_2D, 0, 
         GL_R32F,
         earth_resources.reader->getWidth(), earth_resources.reader->getHeight(), 0,
         GL_RED, GL_FLOAT,
-        buffer
+        type == bufferType :: B ? & earth_resources.bBuffer[0] : buffer
     );
 
     return texture;

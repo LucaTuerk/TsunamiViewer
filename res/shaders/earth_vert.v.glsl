@@ -12,7 +12,7 @@ attribute vec2 uv;
 
 varying vec2 texcoord;
 varying vec3 normal;
-varying float bOver, bPh, b, h, hu, hv;
+//varying float bOver, bPh, b, h, hu, hv;
 
 // Constants
 const float hFac = 1.;
@@ -38,12 +38,12 @@ void main () {
     texcoord    = vec2(uv.x, y);
 
     // sample texures.
-    b       = texture2D( bTexture , texcoord).r;
-    h       = texture2D( hTexture , texcoord).r;
-    bOver   = map ( max ( .0, b), 0., maxHeight, 0., 1. );
-    bPh     = makeCombinedHeight ( h, b );
-    hu      = texture2D( huTexture, texcoord).r;
-    hv      = texture2D( hvTexture, texcoord).r;
+    float b       = texture2D( bTexture , texcoord).r;
+    float h       = texture2D( hTexture , texcoord).r;
+    //bOver   = map ( max ( .0, b), 0., maxHeight, 0., 1. );
+    //bPh     = makeCombinedHeight ( h, b );
+    //hu      = texture2D( huTexture, texcoord).r;
+    //hv      = texture2D( hvTexture, texcoord).r;
     
     // Extend vertex along normal (normal = position on unit circle)
     vec3 pos = position.xyz * ( 1. + ( map ( ( b > 0. ? .01 * b : b ) + h, minHeight, maxHeight, 0., 1.) ) * hFac);

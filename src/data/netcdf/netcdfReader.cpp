@@ -110,7 +110,7 @@ void netcdfReader :: writeBuffer ( float buffer[], bufferType type, int timeStep
 }
 
 int netcdfReader :: getTimeStep ( float time ) noexcept {
-    last = (int) (std::min ( 1.f , std::max ( 0.f, time ) ) * timeLen);
+    last = (int) (std::min ( .99f , std::max ( 0.f, time ) ) * timeLen);
     return last;
 }
 
