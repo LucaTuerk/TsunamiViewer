@@ -99,24 +99,23 @@ void main () {
     float diffRaw = 
         ( 0.5 * max ( dot ( worldSunDir, normNormal), 0.0 ) 
         + 0.5 *  max ( dot ( worldMoonDir, normNormal), 0.0 ));
-    float diffFac = (1. - ambientFac) * diffRaw;
 
-    vec3 diffuseTerm = diffFac * color;
+    vec3 diffuseTerm = diffRaw * color;
 
     // Calculate specular term form moon and sun light sources
     vec3 moonTerm =  0.5 * calculateSpecularTerm ( worldMoonDir, moonColor, normNormal, isWater);
-    vec3 sunTerm =  0.5 * calculateSpecularTerm ( worldSunDir, sunColor, normNormal, isWater);
+    vec3 sunTerm = calculateSpecularTerm ( worldSunDir, sunColor, normNormal, isWater);
 
     float dispFactor =
         displayMode == modeU    ? map   ( hu, minVal, maxVal, -1., 1. ) :
         displayMode == modeV    ? map   ( hv, minVal, maxVal, -1., 1. ) :
         displayMode == modeUV   ? map   ( hu + hv, minVal, maxVal, -1., 1. ) :
-        displayMode == modeH    ? map   ( h , minVal, maxVal, -1., 1. )
+        displayMode == modeH    ? map   ( h + b, minVal, maxVal, -1., 1. )
          : 0.;
 
-    vec3 displayTerm = abs ( minVal - maxVal ) < 0.5 ? vec3 (0.,0.,0.) : max ( 0.0, dispFactor ) * vec3 (0., 0., 1.) - min ( 0.0, dispFactor ) * vec3 (1.,0.,0.); 
+    vec3 displayTerm = abs ( minVal - maxVal ) < 0.5 ? vec3 (0.,0.,0.) : max ( 0.0, dispFactor ) * vec3 (1., 0., 0.) - min ( 0.0, dispFactor ) * vec3 (0.,0.,1.); 
 
-    vec3 main = mix ( diffuseTerm + moonTerm + sunTerm + ambientTerm, displayTerm, isWater ? length ( displayTerm ) : 0. );
+    vec3 main = mix ( diffuseTerm +  moonTerm + sunTerm + ambientTerm, displayTerm, isWater ? length ( displayTerm ) : 0. );
 
     if ( diffRaw < 0.30 && !isWater) {
         main += mix ( 

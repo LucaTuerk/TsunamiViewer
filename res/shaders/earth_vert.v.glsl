@@ -15,20 +15,16 @@ varying vec3 normal;
 //varying float bOver, bPh, b, h, hu, hv;
 
 // Constants
-const float hFac = 1.;
+const float hFac = .125;
 const float minHeight = -10035.;
 const float maxHeight = 6877.;
+const float maxWaveHeight = 100.;
+const float minWaveHeight = -100;
 const float offsetUv = 0.15;
 
 // Map value to new range
 float map ( float val, float minOrig, float maxOrig, float newMin, float newMax ) {
     return newMin + (val - minOrig) * (newMax - newMin) / (maxOrig - minOrig);
-}
-
-// Combine h and b values for overall height values. 
-float makeCombinedHeight ( float h, float b ) {
-    float newB = b < 0. ? b : 0.1 * b;
-    return map ( newB + h, minHeight, maxHeight, 0., 1. );
 }
 
 void main () {
@@ -40,13 +36,9 @@ void main () {
     // sample texures.
     float b       = texture2D( bTexture , texcoord).r;
     float h       = texture2D( hTexture , texcoord).r;
-    //bOver   = map ( max ( .0, b), 0., maxHeight, 0., 1. );
-    //bPh     = makeCombinedHeight ( h, b );
-    //hu      = texture2D( huTexture, texcoord).r;
-    //hv      = texture2D( hvTexture, texcoord).r;
     
     // Extend vertex along normal (normal = position on unit circle)
-    vec3 pos = position.xyz * ( 1. + ( map ( ( b > 0. ? .01 * b : b ) + h, minHeight, maxHeight, 0., 1.) ) * hFac);
+    vec3 pos = position.xyz * ( 1.5 +  map((b + h), minHeight, maxHeight, 0., 1.) * hFac  );
     
     // Pass normal for lighting calculation
     normal = position.xyz;

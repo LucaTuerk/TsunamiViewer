@@ -3,3 +3,4 @@
 #define modeV   ((GLuint) 1)
 #define modeUV  ((GLuint) 2)
 #define modeH   ((GLuint) 3)
+#define modeNone ((GLuint) 4)

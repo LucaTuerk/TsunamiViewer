@@ -90,31 +90,55 @@ static void setEarthUniforms () {
     glUniform4fv ( earth_resources.uniforms.viewDir, 1, glm::value_ptr(viewDir()));
     glUniform4fv ( earth_resources.uniforms.moonDir, 1, glm::value_ptr(moonDir()));
     glUniform4fv ( earth_resources.uniforms.sunDir, 1,  glm::value_ptr(sunDir()));
-    glUniform1f ( earth_resources.uniforms.minVal, earth_resources.minVal );
-    glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.maxVal );
     glUniform1f ( earth_resources.uniforms.ambient, earth_resources.ambient );
 
+    std::vector<float> & minV = earth_resources.hMinV;
+    std::vector<float> & maxV = earth_resources.hMaxV;
+    float & min = earth_resources.hMin;
+    float & max = earth_resources.hMax;
+    glUniform1ui ( earth_resources.uniforms.mode, modeNone );
     switch ( earth_resources.mode ) {
         case displayMode :: H :
             glUniform1ui ( earth_resources.uniforms.mode, modeH );
-            glUniform1f ( earth_resources.uniforms.minVal, earth_resources.hMin);
-            glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.hMax);
             break;
         case displayMode :: U :
+            minV = earth_resources.huMinV;
+            maxV = earth_resources.huMaxV;
+            min = earth_resources.huMin;
+            max = earth_resources.huMax;
             glUniform1ui ( earth_resources.uniforms.mode, modeU );
-            glUniform1f ( earth_resources.uniforms.minVal, earth_resources.huMin);
-            glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.huMax);
             break;
         case displayMode :: V :
+            minV = earth_resources.hvMinV;
+            maxV = earth_resources.hvMaxV;
+            min = earth_resources.hvMin;
+            max = earth_resources.hvMax;
             glUniform1ui ( earth_resources.uniforms.mode, modeV );
-            glUniform1f ( earth_resources.uniforms.minVal, earth_resources.hvMin);
-            glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.hvMax);
             break;
-        case displayMode :: UV :
-            glUniform1ui ( earth_resources.uniforms.mode, modeUV );
-            glUniform1f ( earth_resources.uniforms.minVal, earth_resources.huMin + earth_resources.hvMin );
-            glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.huMax + earth_resources.hvMax );
-            break;
+    }
+
+    if ( earth_resources.mode != displayMode :: UV ) {
+        glUniform1f ( earth_resources.uniforms.minVal, 
+            earth_resources.globalMinMax ? 
+                * std::min_element ( minV.begin(), minV.end() ) : 
+                min);
+
+        glUniform1f ( earth_resources.uniforms.maxVal,  earth_resources.globalMinMax ? 
+                * std::max_element ( maxV.begin(), maxV.end() ) : 
+                max
+        );
+    }
+    else {
+        glUniform1ui ( earth_resources.uniforms.mode, modeUV );
+        glUniform1f ( earth_resources.uniforms.minVal,
+            earth_resources.globalMinMax ?  
+            * std::min_element ( earth_resources.huMinV.begin(), earth_resources.huMinV.end()) +
+            * std::min_element ( earth_resources.hvMinV.begin(), earth_resources.hvMinV.end())  :
+            earth_resources.huMin + earth_resources.hvMin );
+        glUniform1f ( earth_resources.uniforms.maxVal, earth_resources.globalMinMax ?  
+            * std::max_element ( earth_resources.huMaxV.begin(), earth_resources.huMaxV.end()) +
+            * std::max_element ( earth_resources.hvMaxV.begin(), earth_resources.hvMaxV.end())  :
+            earth_resources.huMax + earth_resources.hvMax );
     }
 }
 
@@ -240,7 +264,7 @@ static float minimumH ( float time, std::vector<float> & minV  ) {
     float * bPtr= & earth_resources.bBuffer[0];
     float mini = FLT_MAX;
     for ( int i = 0; i < dim; i++ ) {
-        if (ptr[i] != 0. ) {
+        if (ptr[i] > 0. ) {
             float val =  ptr[i] + bPtr[i];
             mini = mini < val ? mini : val;
         }
@@ -260,7 +284,7 @@ static float maximumH ( float time, std::vector<float> & maxV ) {
     float * bPtr= & earth_resources.bBuffer[0];
     float maxi = FLT_MIN;
     for ( int i = 0; i < dim; i++ ) {
-        if ( ptr[i] != 0 ) {
+        if ( ptr[i] > 0. ) {
             float val =  ptr[i] + bPtr[i];
             maxi = maxi > val ? maxi : val;
         }

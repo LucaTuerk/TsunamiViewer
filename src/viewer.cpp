@@ -33,12 +33,12 @@ static int makeResources (void) {
     earth_resources.minMaxCalculated = std::vector<bool> ( 
         earth_resources.reader->getMaxTimeStep(), false
     );
-    earth_resources.hMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
-    earth_resources.hMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
-    earth_resources.huMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
-    earth_resources.huMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
-    earth_resources.hvMinV.reserve ( earth_resources.reader->getMaxTimeStep() );
-    earth_resources.hvMaxV.reserve ( earth_resources.reader->getMaxTimeStep() );
+    earth_resources.hMinV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MAX );
+    earth_resources.hMaxV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MIN );
+    earth_resources.huMinV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MAX );
+    earth_resources.huMaxV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MIN );
+    earth_resources.hvMinV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MAX );
+    earth_resources.hvMaxV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MIN );
 
     earth_resources.ambient = 0.45;
 
@@ -82,6 +82,22 @@ static int makeResources (void) {
         makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X100 );
     elementIds.times200 = 
         makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X200 );
+    elementIds.times400 = 
+        makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X400 );
+    elementIds.times750 = 
+        makeUIElement( glm::vec2 ( 0.85, -0.8 ), glm::vec2 ( 0.1, 0.2 ), X750 );
+    elementIds.H = 
+        makeUIElement( glm::vec2 ( -0.8, -0.825), glm::vec2 (0.15,0.15), HTEX);
+    elementIds.U = 
+        makeUIElement( glm::vec2 ( -0.8, -0.825), glm::vec2 (0.15,0.15), HUTEX);
+    elementIds.V = 
+        makeUIElement( glm::vec2 ( -0.8, -0.825), glm::vec2 (0.15,0.15), HVTEX);
+    elementIds.UV = 
+        makeUIElement( glm::vec2 ( -0.8, -0.825), glm::vec2 (0.15,0.15), HUHVTEX);
+    elementIds.global =
+        makeUIElement( glm::vec2 ( -0.65, -0.843), glm::vec2 ( 0.24, 0.12), GLOBAL );
+    elementIds.local =
+        makeUIElement( glm::vec2 ( -0.65, -0.843), glm::vec2 ( 0.24, 0.12), LOCAL );
     elementIds.help =
         makeUIElement ( glm::vec2(-1,1), glm::vec2 (2,2), HELP );
 
@@ -188,6 +204,12 @@ static void render (void) {
         case 200:
             elementIds.list.push_back( elementIds.times200 );
             break;
+         case 400:
+            elementIds.list.push_back( elementIds.times400 );
+            break;
+         case 750:
+            elementIds.list.push_back( elementIds.times750 );
+            break;
     }
 
     switch ( transportControl.state ) {
@@ -202,6 +224,32 @@ static void render (void) {
             break;
         case transportState :: STOPPED :
             elementIds.list.push_back ( elementIds.stop );
+            break;
+    }
+
+    switch ( earth_resources.mode ) {
+        case displayMode :: H :
+            elementIds.list.push_back ( elementIds.H );
+            break;
+        case displayMode :: U :
+            elementIds.list.push_back ( elementIds.U );
+            break;
+        case displayMode :: V :
+            elementIds.list.push_back ( elementIds.V );
+            break;
+        case displayMode :: UV :
+            elementIds.list.push_back ( elementIds.UV );
+            break;
+    }
+
+    switch ( earth_resources.globalMinMax ) {
+        case true :
+            if (earth_resources.mode != displayMode :: NONE)
+                elementIds.list.push_back ( elementIds.global );
+            break;
+        case false :
+            if (earth_resources.mode != displayMode :: NONE)
+                elementIds.list.push_back ( elementIds.local );
             break;
     }
 

@@ -48,7 +48,11 @@ static struct {
         times20,
         times50,
         times100,
-        times200;
+        times200,
+        times400,
+        times750;
+    int H, U, V, UV;
+    int global, local;
     std::vector<int> list;
 } elementIds;
 

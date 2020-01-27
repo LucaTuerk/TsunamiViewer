@@ -29,6 +29,16 @@
 #define X50 "../res/tex/x50tga.tga"
 #define X100 "../res/tex/x100tga.tga"
 #define X200 "../res/tex/x200tga.tga"
+#define X400 "../res/tex/x400tga.tga"
+#define X750 "../res/tex/x750tga.tga"
+
+#define HTEX "../res/tex/h.tga"
+#define HUTEX "../res/tex/hu.tga"
+#define HVTEX "../res/tex/hv.tga"
+#define HUHVTEX "../res/tex/huhv.tga"
+
+#define GLOBAL "../res/tex/global.tga"
+#define LOCAL "../res/tex/local.tga"
 
 #define VERT  "../res/shaders/background_vert.v.glsl"
 #define FRAG  "../res/shaders/background_frag.f.glsl"

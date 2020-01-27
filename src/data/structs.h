@@ -87,7 +87,7 @@ static struct {
     int multiplier;
 } transportControl;
 
-enum class displayMode { U, V, UV, H };
+enum class displayMode { U, V, UV, H, NONE};
 
 static struct {
     std::unique_ptr<netcdfReader> reader;
@@ -141,6 +141,7 @@ static struct {
 
     std::vector <float> hMinV, hMaxV, huMinV, huMaxV, hvMinV, hvMaxV;
     std::vector <bool> minMaxCalculated;
+    bool globalMinMax;
 } earth_resources;
 
 #endif

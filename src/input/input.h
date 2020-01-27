@@ -79,6 +79,9 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
         case 'c' :
             earth_resources.mode = displayMode :: UV;
             break;
+        case 'n' :
+            earth_resources.mode = (displayMode) -1;
+            break;
         case 'w' :
             input.ambientUp = true;
             break;
@@ -90,6 +93,9 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
             break;
         case 'd' :
             input.lightRight = true;
+            break;
+        case 'g' :
+            earth_resources.globalMinMax = ! earth_resources.globalMinMax;
             break;
         case 27 : // Escape key
             input.showHelp = true;
