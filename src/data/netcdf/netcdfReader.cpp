@@ -6,6 +6,11 @@
 
 #define NETCDF_ERR(msg, retval) {printf("%s: %s\n", msg, nc_strerror(retval)); throw std::runtime_error(msg);}
 
+
+/**
+ * Construct a netCDF reader
+ * @param filename path to netCDF file
+ **/
 netcdfReader :: netcdfReader ( const char * filename ) : last ( -1 ){
     int retval;
     int varId;
@@ -77,6 +82,12 @@ netcdfReader :: ~netcdfReader () {
     nc_close ( netCdfId );
 }
 
+
+/**
+ * Convert bufferType enum to string
+ * 
+ * @param type type
+ **/
 std::string typeToString ( bufferType type ) {
     return 
         type == bufferType::H ? "h" :
@@ -86,11 +97,18 @@ std::string typeToString ( bufferType type ) {
 }
 
 
+/**
+ * Writes data from netCDF to a buffer.
+ * 
+ * @param buffer out buffer for data
+ * @param type type of buffer to be written
+ * @param timeStep time step to be read
+ **/
 void netcdfReader :: writeBuffer ( float buffer[], bufferType type, int timeStep) const {
     int retval;
 
-    size_t start [] = { timeStep, 0, 0 };
-    size_t count [] = { 1, yLen, xLen };
+    size_t start [] = { (size_t) timeStep, 0, 0 };
+    size_t count [] = { 1, yLen,  xLen };
 
     int varId = 
         type == bufferType :: H  ? hVar :
@@ -109,27 +127,49 @@ void netcdfReader :: writeBuffer ( float buffer[], bufferType type, int timeStep
     }
 }
 
+
+/**
+ * Get the timestep from time value in the [0, 1) range
+ * @param time time value in the [0, 1) range
+ **/
 int netcdfReader :: getTimeStep ( float time ) noexcept {
     last = (int) (std::min ( .99f , std::max ( 0.f, time ) ) * timeLen);
     return last;
 }
 
+/**
+ * Return largest timestep
+ **/
 int netcdfReader :: getMaxTimeStep() const noexcept {
     return timeLen;
 }
 
+/**
+ * Return largest simulation time ( value of time var at maxTimeStep)
+ **/
 float netcdfReader :: getMaxTime () const noexcept {
     return maxTime;
 }
 
+/**
+ * Get witdh of netCDF arrays
+ **/
 int netcdfReader :: getWidth () const noexcept {
     return xLen;
 }
 
+/**
+ * Get height of netCDF arrays
+ **/
 int netcdfReader :: getHeight () const noexcept {
     return yLen;
 }
-
+/**
+ * Returns wheather an update to the openGL textures is necessary, depending on 
+ * the last time value.
+ * 
+ * @param time current time in the range [0,1)
+ **/
 bool netcdfReader :: requiresUpdate ( float time ) const noexcept {
     return (int) (std::min ( 1.f , std::max ( 0.f, time ) ) * timeLen) != last;
 }

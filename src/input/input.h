@@ -14,11 +14,19 @@
 
 #define SPACEBAR 32
 
+
+/**
+ * Struct holding command line parameters and default values.
+ **/
 static struct {
     std::string filePath = "../res/netcdf/200122-sm_00.nc";
     int divisor = 1;
 } commandLine;
 
+
+/**
+ * Struct holding input data.
+ **/
 static struct {
     int mouseX, mouseY;
     int deltaMouseX, deltaMouseY;
@@ -32,6 +40,11 @@ static struct {
     bool showHelp;
 } input;
 
+
+/**
+ * Mouse down listener.
+ * Setting transport controls, display modes, lighting.
+ **/
 static void keyboardFunc ( unsigned char key, int x, int y ) {
     switch ( key ) {
         case SPACEBAR :
@@ -103,6 +116,11 @@ static void keyboardFunc ( unsigned char key, int x, int y ) {
     }
 }
 
+
+/**
+ * Listener for released keys. 
+ * Track escape key.
+ **/
 static void keyboardUpFunc ( unsigned char key, int x, int y ) {
     switch ( key ) {
         case 27 : // Escape key
@@ -111,6 +129,11 @@ static void keyboardUpFunc ( unsigned char key, int x, int y ) {
     }
 }
 
+
+/**
+ * Listener for special character input. 
+ * Necessary to read arrow keys.
+ **/
 static void specialFunc ( int key, int x, int y ) {
     switch ( key ) {
         case GLUT_KEY_LEFT :
@@ -125,6 +148,11 @@ static void specialFunc ( int key, int x, int y ) {
     }
 }
 
+
+/**
+ * Function listening for mouse button input.
+ * Track mouse buttons and wheels.
+ **/
 static void mouseButtonFunc ( int button, int state, int x, int y ) {
     if( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN ) {
         input.mouseClicked = true;
@@ -142,6 +170,11 @@ static void mouseButtonFunc ( int button, int state, int x, int y ) {
     }
 }
 
+
+/**
+ * Listener function called when the mouse is moved without a mouse button being pressed.
+ * Used to set x, y values to calculate deltas in mouseActive, and to reset delta values.
+ **/
 static void mousePassive ( int x, int y ) {
     input.deltaMouseX = 0;
     input.deltaMouseY = 0;
@@ -149,6 +182,11 @@ static void mousePassive ( int x, int y ) {
     input.mouseY = y;
 }
 
+
+/**
+ * Listener function called when the mouse is moved and a mouse button is pressed.
+ * Updates delta mouse movement to be used in updateCamera method.
+ **/
 static void mouseActive ( int x, int y ) {
     // Acitive func should only apply on left mouse clicks.
     if ( input.mouseClicked ) {
@@ -159,6 +197,9 @@ static void mouseActive ( int x, int y ) {
     }
 }
 
+/**
+ * Update the camera according to input.
+ **/
 static void updateCamera () {
     float distScaling = std::log ( camera.distance + 4.01f );
     camera.lambda += distScaling * input.sensitivity * (float) input.deltaMouseX / glutGet(GLUT_WINDOW_WIDTH);

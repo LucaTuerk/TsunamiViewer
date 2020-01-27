@@ -21,6 +21,11 @@
 #include <glm/glm.hpp>
 #include <string>
 
+
+/**
+ * Initialization function setting up everything we need.
+ * Loading resources, compiling shaders, loading netCDF data etc.
+ **/
 static int makeResources (void) {
     camera.fov = 100.f;
     camera.distance = 5.f;
@@ -30,7 +35,13 @@ static int makeResources (void) {
 
     earth_resources.reader = std::make_unique< netcdfReader > (commandLine.filePath.c_str());
     
-    earth_resources.minMaxCalculated = std::vector<bool> ( 
+    earth_resources.hCalc = std::vector<bool> ( 
+        earth_resources.reader->getMaxTimeStep(), false
+    );
+    earth_resources.huCalc = std::vector<bool> ( 
+        earth_resources.reader->getMaxTimeStep(), false
+    );
+    earth_resources.hvCalc = std::vector<bool> ( 
         earth_resources.reader->getMaxTimeStep(), false
     );
     earth_resources.hMinV = std::vector<float> ( earth_resources.reader->getMaxTimeStep(), FLT_MAX );
@@ -108,6 +119,11 @@ static int makeResources (void) {
     return 1;
 }
 
+
+/**
+ * Update function called every frame to update relevant data, such as 
+ * camera position, lighting parameters, time etc.
+ **/
 static void update (void) {
     // Fetch time
     int time = glutGet ( GLUT_ELAPSED_TIME );
@@ -166,6 +182,10 @@ static void update (void) {
     glutPostRedisplay();
 }
 
+
+/**
+ * GLUT display function. The frame is build here.
+ **/
 static void render (void) {
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT );
     
@@ -261,7 +281,6 @@ static void render (void) {
     glutSwapBuffers ();
 }
 
-
 int main (int argc, char ** argv) {
     glutInit(&argc, argv);
     // Parse command line params
@@ -291,9 +310,6 @@ int main (int argc, char ** argv) {
             if ( commandLine.divisor < 1 ) {
                 std::cerr << "Abort! " << commandLine.divisor << " is an invalid size divisor" << std::endl;
                 return 1;
-            } 
-            if ( commandLine.divisor > 20 ) {
-                std::cerr << "Warning! " << commandLine.divisor << " too large for size divisor."  << std::endl;
             }
         }
         else {

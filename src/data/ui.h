@@ -11,12 +11,19 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+
+/**
+ * data structure for ui element
+ **/
 typedef struct {
     glm::vec2 position;
     glm::vec2 size;
     GLuint texture;
 } ui_element;
 
+/**
+ * Struct of resources for ui rendering
+ **/
 static struct {
     std::vector<ui_element> elements;
 
@@ -38,6 +45,10 @@ static struct {
     } attributes;
 } ui;
 
+
+/**
+ * Struct of ids of ui elements
+ **/
 static struct {
     int help;
     int play, reverse, pause, stop;
@@ -56,6 +67,10 @@ static struct {
     std::vector<int> list;
 } elementIds;
 
+
+/**
+ * Resources for progressbar rendering
+ **/
 static struct {
     GLuint vertex_buffer;
     GLuint index_buffer;

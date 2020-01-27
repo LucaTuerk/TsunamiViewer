@@ -14,6 +14,14 @@
 #include "../utils/TGA/tga.hpp"
 #include "../data/netcdf/netcdfReader.h"
 
+
+/**
+ * Get content from file
+ * 
+ * @param file path to file
+ * @param length out length of read data
+ * @return char buffer with contents
+ **/
 static char * getFileContents ( const char * file, GLint * length ) {
     std::ifstream i_file;
     i_file.open ( file );
@@ -41,6 +49,10 @@ static char * getFileContents ( const char * file, GLint * length ) {
     return buffer;
 }
 
+
+/**
+ * Show shader error messages.
+ **/
 static void showInfoLog (GLuint object, PFNGLGETSHADERIVPROC glGetIV, PFNGLGETSHADERINFOLOGPROC glGetInfo) {
     GLint log_length;
     char * log;
@@ -53,6 +65,14 @@ static void showInfoLog (GLuint object, PFNGLGETSHADERIVPROC glGetIV, PFNGLGETSH
     delete( log );
 }
 
+
+/**
+ * Make buffer.
+ * 
+ * @param target type of buffer
+ * @param bufferData pointer to data
+ * @param bufferSize size of data
+ **/
 static GLuint makeBuffer ( GLenum target, const void * bufferData, GLsizei bufferSize ) {
     GLuint buffer;
     std::cout << "  Making Buffer: " << buffer << std::endl;
@@ -62,6 +82,10 @@ static GLuint makeBuffer ( GLenum target, const void * bufferData, GLsizei buffe
     return buffer;
 }
 
+
+/**
+ * Generate Texture and set parameters.
+ **/
 static GLuint makeTexture (  ) {
     GLuint texture;
     // Generate and Bind Texture
@@ -77,6 +101,12 @@ static GLuint makeTexture (  ) {
     return texture;
 }
 
+
+/**
+ * Load an make a texture.
+ * 
+ * @param file path to image file
+ **/
 static GLuint makeTexture ( const std::string & file ) {
     GLuint texture = makeTexture();
 
@@ -101,6 +131,12 @@ static GLuint makeTexture ( const std::string & file ) {
     return texture;
 }
 
+
+/**
+ * Make a texture filled with data from netCDF file
+ * 
+ * @param type type of data
+ **/
 static GLuint makeTextureFromData ( bufferType type ) {
     GLuint texture = makeTexture();
 
@@ -123,6 +159,13 @@ static GLuint makeTextureFromData ( bufferType type ) {
     return texture;
 }
 
+
+/**
+ * Compile the passed shader.
+ * 
+ * @param type the type of shader to be compiled
+ * @param file file path to shader file
+ **/
 static GLuint makeShader ( GLenum type, const char * file ) {
     GLint length;
     GLchar * source = getFileContents (file, &length);
@@ -150,6 +193,12 @@ static GLuint makeShader ( GLenum type, const char * file ) {
     return shader;
 }
 
+
+/**
+ * Combine shaders to make a shader program.
+ * 
+ * @param shaders list of shaders to be combined
+ **/
 static GLuint makeProgram ( std::initializer_list<GLuint> shaders ) {
     GLint program_ok;
 

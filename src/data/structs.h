@@ -15,7 +15,10 @@
 #include <vector>
 
 
-// Camera
+
+/**
+ * Struct for camera and lighting parameters.
+ **/
 static struct {
     glm::vec3 location, rotation;
     float fov;
@@ -29,7 +32,9 @@ static struct {
 } camera;
 
 
-// Background Rendering 
+/**
+ * Vertex buffer for static background (unused)
+ **/
 static const GLfloat vertex_buffer_data [] = {
     -1.0f, -1.0f,
     1.0f, -1.0f,
@@ -37,6 +42,11 @@ static const GLfloat vertex_buffer_data [] = {
     1.0f, 1.0f
 };
 
+
+/**
+ * buffer data of uv coords for ui
+ * (vertex pos is determined in shader)
+ **/
 static const GLfloat uv_buffer_data [] = {
     0.f, 0.f,
     1.0f, 0.f,
@@ -44,10 +54,18 @@ static const GLfloat uv_buffer_data [] = {
     1.0f, 1.0f
 };
 
+
+/**
+ * Index buffer data for UI
+ **/
 static const GLushort element_buffer_data [] = {
     0, 1, 2, 3
 };
 
+
+/**
+ * Struct of resources for background rendering.
+ **/
 static struct {
     GLuint vertex_buffer;
     GLuint element_buffer;
@@ -71,14 +89,25 @@ static struct {
 } resources;
 
 
-// Earth rendering
+
+/**
+ * vertex data structure for earth vertex buffer
+ **/
 typedef struct {
     glm::vec4 position;
     glm::vec2 uv;
 } vertex;
 
+
+/**
+ * Enum of possible transport states
+ **/
 enum class transportState { PLAYING, REVERSED, PAUSED, STOPPED };
 
+
+/**
+ * struct of data for transport control
+ **/
 static struct {
     transportState state;
     int deltaTime;
@@ -87,8 +116,15 @@ static struct {
     int multiplier;
 } transportControl;
 
+
+/**
+ * Enum of possible visualization modes 
+ **/
 enum class displayMode { U, V, UV, H, NONE};
 
+/**
+ * Struct of resources for earth rendering.
+ **/
 static struct {
     std::unique_ptr<netcdfReader> reader;
     float currentTime;
@@ -140,7 +176,7 @@ static struct {
     GLfloat ambient;
 
     std::vector <float> hMinV, hMaxV, huMinV, huMaxV, hvMinV, hvMaxV;
-    std::vector <bool> minMaxCalculated;
+    std::vector <bool> hCalc, hvCalc, huCalc;
     bool globalMinMax;
 } earth_resources;
 

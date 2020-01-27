@@ -17,6 +17,9 @@
 #include "../data/ui.h"
 #include "../data/global_defines.h"
 
+/**
+ * Render the background.
+ **/
 static void renderBackground () {
     // Set Program for use
     glUseProgram ( resources.program );
@@ -79,6 +82,9 @@ static void renderBackground () {
     glDisableVertexAttribArray( earth_resources.attributes.uv );
 }
 
+/**
+ * Set shader uniform for earth rendering.
+ **/
 static void setEarthUniforms () {
     // Set Uniforms
     glm::mat4 MVP = projection() * view() * earth_model();
@@ -142,6 +148,10 @@ static void setEarthUniforms () {
     }
 }
 
+/**
+ * Set up vertex and index buffer for rendering, and
+ * draw earth.
+ **/
 static void setEarthBuffers () { 
     for ( int i = 0; i < earth_resources.vertex_buffers.size(); i++ ) {
         // Set Buffers
@@ -189,41 +199,16 @@ static void setEarthBuffers () {
     }
 }
 
-static void renderEarth () {
-    // Set Program for use
-    glUseProgram ( earth_resources.program );
-    
-    // Set Uniforms
-    setEarthUniforms();
-
-    // Set Textures
-    glActiveTexture ( GL_TEXTURE0 );
-    glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[0] );
-    glUniform1i ( earth_resources.uniforms.textures[0], 0 );
-
-    glActiveTexture ( GL_TEXTURE1 );
-    glBindTexture (GL_TEXTURE_2D, earth_resources.textures[1] );
-    glUniform1i ( earth_resources.uniforms.textures[1], 1 );
-
-    glActiveTexture ( GL_TEXTURE2 );
-    glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[2] );
-    glUniform1i ( earth_resources.uniforms.textures[2], 2 );
-
-    glActiveTexture ( GL_TEXTURE3 );
-    glBindTexture (GL_TEXTURE_2D, earth_resources.textures[3] );
-    glUniform1i ( earth_resources.uniforms.textures[3], 3 );
-
-    glActiveTexture ( GL_TEXTURE4 );
-    glBindTexture (GL_TEXTURE_2D, earth_resources.textures[4] );
-    glUniform1i ( earth_resources.uniforms.textures[4], 4);
-
-    // Set Buffers
-    setEarthBuffers();
-}
-
-static float minimum ( float time, std::vector<float> & minV ) { 
+/**
+ * Get the minimum of the readBuffer.
+ * 
+ * @param time simulation time in [0,1) range
+ * @param minV vector of pre-computed values
+ * @param calc vector specifiying if this step has already been calculated
+ **/
+static float minimum ( float time, std::vector<float> & minV, std::vector<bool> & calc) { 
     int step = earth_resources.reader->getTimeStep(time);
-    if ( earth_resources.minMaxCalculated[ step ]) {
+    if ( calc [ step ]) {
         return minV[step];
     }
 
@@ -237,9 +222,16 @@ static float minimum ( float time, std::vector<float> & minV ) {
     return mini;
 }
 
-static float maximum ( float time, std::vector<float> & maxV  ) {
+/**
+ * Get the maximum of the readBuffer.
+ * 
+ * @param time simulation time in [0,1) range
+ * @param minV vector of pre-computed values
+ * @param calc vector specifiying if this step has already been calculated
+ **/
+static float maximum ( float time, std::vector<float> & maxV, std::vector<bool> & calc ) {
     int step = earth_resources.reader->getTimeStep(time);
-    if ( earth_resources.minMaxCalculated[ step ]) {
+    if ( calc[ step ] ) {
         return maxV[step];
     }
 
@@ -253,9 +245,15 @@ static float maximum ( float time, std::vector<float> & maxV  ) {
     return maxi;
 }
 
+/**
+ * Get the minimum of the readBuffer content plus bathymetry data.
+ * 
+ * @param time simulation time in [0,1) range
+ * @param minV vector of pre-computed values
+ **/
 static float minimumH ( float time, std::vector<float> & minV  ) {
     int step = earth_resources.reader->getTimeStep(time);
-    if ( earth_resources.minMaxCalculated[ step ]) {
+    if ( earth_resources.hCalc[ step ]) {
         return minV[step];
     }
 
@@ -273,9 +271,15 @@ static float minimumH ( float time, std::vector<float> & minV  ) {
     return mini;
 }
 
+/**
+ * Get the maximum of the readBuffer content plus bathymetry data.
+ * 
+ * @param time simulation time in [0,1) range
+ * @param minV vector of pre-computed values
+ **/
 static float maximumH ( float time, std::vector<float> & maxV ) {
     int step = earth_resources.reader->getTimeStep(time);
-    if ( earth_resources.minMaxCalculated[ step ]) {
+    if ( earth_resources.hCalc[ step ]) {
         return maxV[step];
     }
 
@@ -293,7 +297,12 @@ static float maximumH ( float time, std::vector<float> & maxV ) {
     return maxi;
 }
 
-
+/**
+ * Render the earth from a netCDF file
+ * 
+ * @param reader netCDF reader
+ * @param minV simulation time in [0,1) range
+ **/
 static void renderEarthFromData ( netcdfReader & reader, float time ) {
     // Set Program for use
     glUseProgram ( earth_resources.program );
@@ -326,6 +335,10 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
         reader.writeBuffer(buffer, bufferType::H, reader.getTimeStep(time));  
         earth_resources.hMin = minimumH(time, earth_resources.hMinV);
         earth_resources.hMax = maximumH(time, earth_resources.hMaxV);
+        earth_resources.hCalc[
+            earth_resources.reader->getTimeStep(time)
+        ]    = true;
+
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -345,8 +358,11 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture ( GL_TEXTURE_2D, earth_resources.textures[2] );
     if ( requires ) {
         reader.writeBuffer(buffer, bufferType::HU, reader.getTimeStep(time));  
-        earth_resources.huMin = minimum(time, earth_resources.huMinV);
-        earth_resources.huMax = maximum(time, earth_resources.huMaxV);
+        earth_resources.huMin = minimum(time, earth_resources.huMinV, earth_resources.huCalc);
+        earth_resources.huMax = maximum(time, earth_resources.huMaxV, earth_resources.huCalc);
+        earth_resources.huCalc[
+            earth_resources.reader->getTimeStep(time)
+        ]    = true;
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -367,8 +383,11 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[3] );
     if ( requires ) {
         reader.writeBuffer(buffer, bufferType::HV, reader.getTimeStep(time));
-        earth_resources.hvMin = minimum(time, earth_resources.hvMinV);
-        earth_resources.hvMax = maximum(time, earth_resources.hvMaxV);
+        earth_resources.hvMin = minimum(time, earth_resources.hvMinV, earth_resources.hvCalc);
+        earth_resources.hvMax = maximum(time, earth_resources.hvMaxV, earth_resources.hvCalc);
+        earth_resources.hvCalc[
+            earth_resources.reader->getTimeStep(time)
+        ]    = true;
 
         glTexSubImage2D( 
             GL_TEXTURE_2D,                  // texture
@@ -388,10 +407,6 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     glBindTexture (GL_TEXTURE_2D, earth_resources.textures[4] );
     glUniform1i ( earth_resources.uniforms.textures[4], 4);
 
-    earth_resources.minMaxCalculated[
-        earth_resources.reader->getTimeStep(time)
-    ] = true;
-
     // Set Uniforms
     setEarthUniforms();
 
@@ -399,6 +414,11 @@ static void renderEarthFromData ( netcdfReader & reader, float time ) {
     setEarthBuffers();
 }
 
+/**
+ * Render UI elements.
+ * 
+ * @param elements index vector of ui elements to be rendered
+ **/
 static void renderUI ( const std::vector<int> & elements ) {
     if (elements.size() == 0)
         return;
@@ -444,6 +464,9 @@ static void renderUI ( const std::vector<int> & elements ) {
     glDisableVertexAttribArray( ui.attributes.uv );
 }
 
+/**
+ * Render the progress bar
+ **/
 static void renderProgressBar() {
     // Set Program for use
     glUseProgram ( progressbar.program );

@@ -14,6 +14,15 @@
 #include <climits>
 
 
+/**
+ * Split up the given vertex and index buffers up, such that indexing with unsigned shorts is possible.
+ * Indexing with unsigned integers seems to be pretty inefficient, necessitating this function.
+ * 
+ * @param verticies     original vertex buffer
+ * @param indicied      original index buffer
+ * @param vertVector    out vector of vertex buffers
+ * @param indVector     out vector of GLushort index buffers
+ **/
 static void splitBuffers ( std::vector<vertex> & verticies, std::vector<GLuint> & indicies, std::vector< std::vector< vertex > > & vertVector, std::vector< std::vector < GLushort > > & indVector) {
     
     std::map < GLuint, GLushort > map;

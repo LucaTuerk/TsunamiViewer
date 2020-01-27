@@ -16,11 +16,29 @@
 #include "../data/buffersplitter.h"
 #include "../data/structs.h"
 
+/**
+ * Utility to linearly interpolate two values.
+ * 
+ * @param a number a
+ * @param b number b
+ * @param t interpolation factor
+ * 
+ **/
 static float lerp (float a, float b, float t) {
-    return (1-t) * a + t * b;
+    return (1.f -t ) * a + t * b;
 }
 
-// Following http://www.songho.ca/opengl/gl_sphere.html
+/**
+ * Creates the vertex and index buffer for a uv sphere of 
+ * the passed size.
+ * Following http://www.songho.ca/opengl/gl_sphere.html
+ * 
+ * @param nLat number of latitude slices
+ * @param nLon number of longitude slices
+ * @param data reference to target vertex buffer
+ * @param indicies reference to target index buffer
+ * 
+ **/
 template < typename I >
 static int makeUVSphere ( int nLat, int nLon, std::vector < vertex > & data, std::vector < I > & indices ) {
     std::cout << "Making UV " << (nLat + 1) * (nLon + 1) + 2 << std::endl;
@@ -75,6 +93,15 @@ static int makeUVSphere ( int nLat, int nLon, std::vector < vertex > & data, std
     return 1;
 }
 
+/**
+ * Make resources for background render
+ * 
+ * @param tex1 path to displayed texture
+ * @param tex2 path to secondary texture ( not currently in use )
+ * @param vert path to vertex shader
+ * @param frag path to fragment shader
+ * 
+ **/
 static int makeBackground ( const char * tex1, const char * tex2, const char * vert, const char * frag ) {
     std::cout << "Making Background Resources" << std::endl;
 
@@ -156,6 +183,16 @@ static int makeBackground ( const char * tex1, const char * tex2, const char * v
     return 1;
 }
 
+/**
+ * Make resources for earth render
+ * 
+ * @param nLat number of latitude slices
+ * @param nLon number of longitude slices
+ * @param vert path to vertex shader
+ * @param frag path to fragment shader
+ * @param night path to city lights texture
+ * 
+ **/
 static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag, std::string night) {
     std::cout << "Making Earth Resources" << std::endl; 
     // Make Geometry
@@ -291,6 +328,13 @@ static int makeEarth ( int nLat, int nLon, const char * vert, const char * frag,
     return 1;
 }
 
+/**
+ * Make progress bar resources.
+ * 
+ * @param vert path to vertex shader file
+ * @param frag path to fragment shader file
+ * 
+ **/
 static int makeProgressbar ( const char * vert, const char * frag ) {
     // Make Shaders
     progressbar.vertex_shader =
@@ -344,6 +388,14 @@ static int makeProgressbar ( const char * vert, const char * frag ) {
     return 1;
 }
 
+
+/**
+ * Make shared UI resources used by all elements.
+ * 
+ * @param vert path to vertex shader file
+ * @param frag path to fragment shader file
+ * 
+ **/
 static int makeUI ( const char * vert, const char * frag ) {
     // Make Shaders
     ui.vertex_shader =
@@ -399,6 +451,15 @@ static int makeUI ( const char * vert, const char * frag ) {
     return 1;
 }
 
+
+/**
+ * Make a UI element for later display.
+ * 
+ * @param pos positon in screenspace coords (upper left corner)
+ * @param size size in screenspace x,y-dimensions
+ * @param texture path to texture to be displayed
+ * 
+ **/
 static int makeUIElement ( glm::vec2 pos, glm::vec2 size, const char * texture ) {
     GLuint tex = makeTexture(texture);
     if ( tex == 0 )
