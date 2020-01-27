@@ -1,7 +1,7 @@
 tsunamiviewer
 =============
 
-This a utility to view tsunami simulations on spherical world in real time.
+This is a utility to view tsunami simulations on spherical world in real time.
 
 ## install notes
 

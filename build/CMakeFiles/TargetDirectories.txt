@@ -1,3 +1,0 @@
-/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/build/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/build/CMakeFiles/viewer.dir
-/mnt/c/Users/Lucva/Desktop/Tsunami/tsunamiviewer/build/CMakeFiles/edit_cache.dir

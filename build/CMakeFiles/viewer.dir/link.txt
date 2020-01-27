@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/viewer.dir/src/viewer.cpp.o CMakeFiles/viewer.dir/src/data/netcdf/netcdfReader.cpp.o  -o viewer -lGL -lGLEW -lglut -lnetcdf 
